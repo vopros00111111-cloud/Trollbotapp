@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>BlessCoin App</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Подключаем официальный скрипт Телеграма -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<body>
+
+    <!-- Верхняя шапка (Баланс) -->
+    <header class="app-header">
+        <div class="balance-container">
+            <span class="balance-label">Твой баланс:</span>
+            <span class="balance-amount" id="user-balance">0 💰</span>
+        </div>
+    </header>
+
+    <!-- Основной контент (Экраны) -->
+    <main class="app-content">
+        
+        <!-- Экран Казино -->
+        <section id="tab-casino" class="tab-content active">
+            <h2>🎰 Казино</h2>
+            <div class="placeholder-box">
+                <p>Здесь будут слоты, рулетка и краш-игра</p>
+                <button class="game-btn">Слоты (Скоро)</button>
+            </div>
+        </section>
+
+        <!-- Экран Покер -->
+        <section id="tab-poker" class="tab-content">
+            <h2>🃏 Покер</h2>
+            <div class="placeholder-box">
+                <p>Техасский холдем</p>
+                <button class="game-btn">Найти стол</button>
+            </div>
+        </section>
+
+        <!-- Экран Дурак -->
+        <section id="tab-durak" class="tab-content">
+            <h2>🃏 Дурак</h2>
+            <div class="placeholder-box">
+                <p>Классический подкидной</p>
+                <button class="game-btn">Играть с ботом</button>
+            </div>
+        </section>
+
+        <!-- Экран Переводы -->
+        <section id="tab-transfer" class="tab-content">
+            <h2>💸 Переводы</h2>
+            <div class="placeholder-box">
+                <p>Отправить монеты другу</p>
+                <input type="text" placeholder="@username">
+                <input type="number" placeholder="Сумма">
+                <button class="action-btn">Перевести</button>
+            </div>
+        </section>
+
+        <!-- Экран Профиль -->
+        <section id="tab-profile" class="tab-content">
+            <h2>👤 Профиль</h2>
+            <div class="placeholder-box">
+                <p id="user-name">Загрузка...</p>
+                <p>Статистика побед и поражений</p>
+                <button class="action-btn">Настройки</button>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Нижнее меню навигации -->
+    <nav class="bottom-nav">
+        <button class="nav-btn active" data-tab="casino">🎰<br>Казино</button>
+        <button class="nav-btn" data-tab="poker">🃏<br>Покер</button>
+        <button class="nav-btn" data-tab="durak">🃏<br>Дурак</button>
+        <button class="nav-btn" data-tab="transfer"><br>Перевод</button>
+        <button class="nav-btn" data-tab="profile">👤<br>Профиль</button>
+    </nav>
+
+    <script src="script.js"></script>
+</body>
+</html>

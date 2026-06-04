@@ -1,0 +1,119 @@
+/* Базовые настройки и тема Телеграма */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: var(--tg-theme-bg-color, #1c1c1e); /* Берем цвет фона из ТГ */
+    color: var(--tg-theme-text-color, #ffffff);
+    padding-bottom: 80px; /* Отступ под нижнее меню */
+}
+
+/* Шапка с балансом */
+.app-header {
+    background-color: var(--tg-theme-secondary-bg-color, #2c2c2e);
+    padding: 15px;
+    text-align: center;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.balance-label {
+    display: block;
+    font-size: 12px;
+    color: var(--tg-theme-hint-color, #8e8e93);
+}
+
+.balance-amount {
+    display: block;
+    font-size: 24px;
+    font-weight: bold;
+    color: #ffd700; /* Золотой цвет для монет */
+    margin-top: 5px;
+}
+
+/* Контент */
+.app-content {
+    padding: 20px 15px;
+}
+
+.tab-content {
+    display: none; /* Скрываем все экраны по умолчанию */
+    animation: fadeIn 0.3s;
+}
+
+.tab-content.active {
+    display: block; /* Показываем активный */
+}
+
+@keyframes fadeIn {    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+h2 {
+    margin-top: 0;
+    font-size: 22px;
+}
+
+/* Заглушки для игр */
+.placeholder-box {
+    background-color: var(--tg-theme-secondary-bg-color, #2c2c2e);
+    border-radius: 15px;
+    padding: 20px;
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+input {
+    width: 90%;
+    padding: 12px;
+    margin: 10px 0;
+    border-radius: 10px;
+    border: 1px solid var(--tg-theme-hint-color, #444);
+    background-color: var(--tg-theme-bg-color, #1c1c1e);
+    color: var(--tg-theme-text-color, #fff);
+    font-size: 16px;
+}
+
+/* Кнопки */
+.game-btn, .action-btn {
+    background-color: var(--tg-theme-button-color, #3390ec);
+    color: var(--tg-theme-button-text-color, #fff);
+    border: none;
+    padding: 12px 24px;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 10px;
+    width: 100%;
+}
+
+/* Нижнее меню */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: var(--tg-theme-secondary-bg-color, #2c2c2e);    display: flex;
+    justify-content: space-around;
+    padding: 10px 0;
+    border-top: 1px solid rgba(0,0,0,0.1);
+}
+
+.nav-btn {
+    background: none;
+    border: none;
+    color: var(--tg-theme-hint-color, #8e8e93);
+    font-size: 10px;
+    cursor: pointer;
+    flex: 1;
+    text-align: center;
+    transition: color 0.2s;
+}
+
+.nav-btn.active {
+    color: var(--tg-theme-button-color, #3390ec);
+    font-weight: bold;
+}
