@@ -409,16 +409,15 @@ async function startBlackjack() {
         return;
     }
     
-    // Списываем ставку через API
     try {
-        await apiRequest('/transfer', 'POST', {
-            from_id: currentUser.id,
-            to_username: 'casino',
+        await apiRequest('/game-bet', 'POST', {
+            user_id: currentUser.id,
             amount: bet,
-            comment: 'blackjack_bet'
+            game: 'blackjack'
         });
     } catch (error) {
-        // Если нет пользователя casino, просто продолжаем
+        tg.showAlert('❌ Ошибка списания ставки');
+        return;
     }
     
     bjGame.bet = bet;
@@ -434,22 +433,29 @@ async function startBlackjack() {
     
     updateBlackjackUI();
     
-    // Проверка на блэкджек
     if (calculateScore(bjGame.playerHand) === 21) {
         setTimeout(() => stand(), 500);
     }
 }
 
 async function hit() {
-    if (bjGame.gameOver) return;    
+    if (bjGame.gameOver) return;
+    
     bjGame.playerHand.push(bjGame.deck.pop());
     updateBlackjackUI();
     
     const score = calculateScore(bjGame.playerHand);
-    
-    if (score > 21) {
+        if (score > 21) {
         bjGame.gameOver = true;
-        endBlackjack('lose', 'Перебор! Вы проиграли.');
+        document.getElementById('play-controls').style.display = 'none';
+        document.getElementById('bet-controls').style.display = 'block';
+        
+        const msgEl = document.getElementById('bj-message');
+        msgEl.innerText = '❌ Перебор! Вы проиграли.';
+        msgEl.className = 'game-message lose';
+        
+        updateBlackjackUI();
+        await loadBalance();
     }
 }
 
@@ -458,7 +464,6 @@ async function stand() {
     
     bjGame.gameOver = true;
     
-    // Ход дилера
     while (calculateScore(bjGame.dealerHand) < 17) {
         bjGame.dealerHand.push(bjGame.deck.pop());
         await new Promise(resolve => setTimeout(resolve, 500));
@@ -468,42 +473,39 @@ async function stand() {
     const playerScore = calculateScore(bjGame.playerHand);
     const dealerScore = calculateScore(bjGame.dealerHand);
     
-    if (dealerScore > 21 || playerScore > dealerScore) {
-        const winAmount = bjGame.bet * 2;
-        try {
-            await apiRequest('/transfer', 'POST', {
-                from_id: 0,
-                to_username: currentUser.username,
-                amount: winAmount,
-                comment: 'blackjack_win'
-            });
-        } catch (error) {}
-        endBlackjack('win', `🎉 Вы выиграли ${winAmount} монет!`);
-    } else if (playerScore === dealerScore) {
-        try {
-            await apiRequest('/transfer', 'POST', {
-                from_id: 0,
-                to_username: currentUser.username,
-                amount: bjGame.bet,
-                comment: 'blackjack_draw'
-            });
-        } catch (error) {}
-        endBlackjack('draw', '🤝 Ничья! Ставка возвращена.');
-    } else {
-        endBlackjack('lose', ' Дилер выиграл!');    }
-}
-
-function endBlackjack(result, message) {
     document.getElementById('play-controls').style.display = 'none';
     document.getElementById('bet-controls').style.display = 'block';
     
     const msgEl = document.getElementById('bj-message');
-    msgEl.innerText = message;
-    msgEl.className = `game-message ${result}`;
+    
+    if (dealerScore > 21 || playerScore > dealerScore) {
+        const winAmount = bjGame.bet * 2;
+        try {
+            await apiRequest('/game-win', 'POST', {
+                user_id: currentUser.id,
+                amount: winAmount,
+                game: 'blackjack'
+            });
+        } catch (error) {}
+        msgEl.innerText = `🎉 Вы выиграли ${winAmount} монет!`;
+        msgEl.className = 'game-message win';
+    } else if (playerScore === dealerScore) {
+        try {
+            await apiRequest('/game-win', 'POST', {
+                user_id: currentUser.id,
+                amount: bjGame.bet,
+                game: 'blackjack_draw'            });
+        } catch (error) {}
+        msgEl.innerText = ' Ничья! Ставка возвращена.';
+        msgEl.className = 'game-message draw';
+    } else {
+        msgEl.innerText = ' Дилер выиграл!';
+        msgEl.className = 'game-message lose';
+    }
     
     updateBlackjackUI();
-    loadBalance();
-}
+    await loadBalance();
+        }
 
 // ============================================
 // СЛОТЫ
@@ -523,11 +525,21 @@ async function spinSlots() {
         return;
     }
     
+    try {
+        await apiRequest('/game-bet', 'POST', {
+            user_id: currentUser.id,
+            amount: bet,
+            game: 'slots'
+        });
+    } catch (error) {
+        tg.showAlert('❌ Ошибка списания ставки');
+        return;
+    }
+    
     const reels = [document.getElementById('reel1'), document.getElementById('reel2'), document.getElementById('reel3')];
     const msgEl = document.getElementById('slots-message');
     msgEl.innerText = '';
     
-    // Анимация
     for (let i = 0; i < 10; i++) {
         reels.forEach(reel => {
             reel.innerText = slotSymbols[Math.floor(Math.random() * slotSymbols.length)];
@@ -535,7 +547,6 @@ async function spinSlots() {
         await new Promise(resolve => setTimeout(resolve, 100));
     }
     
-    // Финальный результат
     const result = [
         slotSymbols[Math.floor(Math.random() * slotSymbols.length)],
         slotSymbols[Math.floor(Math.random() * slotSymbols.length)],
@@ -544,12 +555,11 @@ async function spinSlots() {
     
     reels.forEach((reel, i) => reel.innerText = result[i]);
     
-    // Проверка выигрыша
     let winAmount = 0;
     let message = '';
     
     if (result[0] === result[1] && result[1] === result[2]) {
-        if (result[0] === '7️⃣') {
+        if (result[0] === '7️') {
             winAmount = bet * 50;
             message = `🎉 ДЖЕКПОТ 777! +${winAmount} монет!`;
         } else {
@@ -563,24 +573,21 @@ async function spinSlots() {
         message = '❌ Не повезло!';
     }
     
+    msgEl.className = winAmount > 0 ? 'game-message win' : 'game-message lose';
+    msgEl.innerText = message;
+    
     if (winAmount > 0) {
         try {
-            await apiRequest('/transfer', 'POST', {
-                from_id: 0,
-                to_username: currentUser.username,
+            await apiRequest('/game-win', 'POST', {
+                user_id: currentUser.id,
                 amount: winAmount,
-                comment: 'slots_win'
+                game: 'slots'
             });
         } catch (error) {}
-        msgEl.className = 'game-message win';
-    } else {
-        msgEl.className = 'game-message lose';
     }
     
-    msgEl.innerText = message;
-    loadBalance();
+    await loadBalance();
 }
-
 // ============================================
 // РУЛЕТКА
 // ============================================
@@ -589,41 +596,60 @@ async function placeRouletteBet(choice) {
     
     if (!bet || bet < 10) {
         tg.showAlert('❌ Минимальная ставка: 10 монет');
-        return;    }
+        return;
+    }
     
     if (bet > currentBalance) {
         tg.showAlert('❌ Недостаточно монет!');
         return;
     }
     
+    let betNumber = null;
+    if (choice === 'number') {
+        betNumber = parseInt(document.getElementById('roulette-number').value);
+        if (isNaN(betNumber) || betNumber < 0 || betNumber > 36) {
+            tg.showAlert('❌ Введите число от 0 до 36');
+            return;
+        }
+    }
+    
+    try {
+        await apiRequest('/game-bet', 'POST', {
+            user_id: currentUser.id,
+            amount: bet,
+            game: 'roulette'
+        });
+    } catch (error) {
+        tg.showAlert('❌ Ошибка списания ставки');
+        return;
+    }
+    
+    const wheel = document.getElementById('roulette-wheel');
     const resultEl = document.getElementById('roulette-result');
     const msgEl = document.getElementById('roulette-message');
+    
     msgEl.innerText = '';
+    resultEl.innerText = '?';
     
-    // Анимация вращения
-    resultEl.innerText = '🎡';
-    resultEl.style.animation = 'spin 2s ease-out';
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    resultEl.style.animation = '';
+    wheel.classList.add('spinning');
+    await new Promise(resolve => setTimeout(resolve, 3000));
+    wheel.classList.remove('spinning');
     
-    // Результат
     const number = Math.floor(Math.random() * 37);
-    const colors = { 0: 'green', 1: 'red', 2: 'black' };
+    resultEl.innerText = number;
     
-    // Определяем цвет
     let color;
     if (number === 0) color = 'green';
     else if ([1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36].includes(number)) color = 'red';
     else color = 'black';
     
-    resultEl.innerText = number;
-    resultEl.style.color = color === 'red' ? '#e74c3c' : color === 'black' ? '#2c3e50' : '#27ae60';
-    
-    // Проверка выигрыша
     let winAmount = 0;
     let message = '';
     
-    if (choice === color) {
+    if (choice === 'number' && betNumber === number) {
+        winAmount = bet * 36;
+        message = `🎯 Выпало ${number}! Вы выиграли ${winAmount} монет!`;
+    } else if (choice === color) {
         const multiplier = color === 'green' ? 14 : 2;
         winAmount = bet * multiplier;
         message = `🎉 Выпало ${number} (${color === 'red' ? 'красное' : color === 'black' ? 'чёрное' : 'зелёное'})! Вы выиграли ${winAmount} монет!`;
@@ -631,22 +657,20 @@ async function placeRouletteBet(choice) {
         message = `😔 Выпало ${number} (${color === 'red' ? 'красное' : color === 'black' ? 'чёрное' : 'зелёное'}). Вы проиграли.`;
     }
     
+    msgEl.className = winAmount > 0 ? 'game-message win' : 'game-message lose';
+    msgEl.innerText = message;
+    
     if (winAmount > 0) {
         try {
-            await apiRequest('/transfer', 'POST', {
-                from_id: 0,
-                to_username: currentUser.username,
+            await apiRequest('/game-win', 'POST', {
+                user_id: currentUser.id,
                 amount: winAmount,
-                comment: 'roulette_win'
+                game: 'roulette'
             });
         } catch (error) {}
-        msgEl.className = 'game-message win';
-    } else {
-        msgEl.className = 'game-message lose';
     }
     
-    msgEl.innerText = message;
-    loadBalance();
+    await loadBalance();
 }
 
 // ============================================
