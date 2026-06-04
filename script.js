@@ -337,3 +337,341 @@ window.addEventListener('load', async () => {
     
     console.log('✅ Все данные загружены');
 });
+// ============================================
+// ИГРЫ В WEB APP
+// ============================================
+
+// Открыть игру
+function openGame(gameName) {
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    document.getElementById(`game-${gameName}`).classList.add('active');
+}
+
+// Закрыть игру
+function closeGame(gameName) {
+    document.getElementById(`game-${gameName}`).classList.remove('active');
+    document.getElementById('tab-games').classList.add('active');
+}
+
+// Обновить renderGames для открытия игр
+function renderGames(games) {
+    const container = document.getElementById('games-list');
+    container.innerHTML = '';
+    
+    if (!games || games.length === 0) {
+        container.innerHTML = '<div style="text-align:center; padding:20px; color:#888;">Нет доступных игр</div>';
+        return;
+    }
+    
+    games.forEach(game => {
+        const card = document.createElement('div');
+        card.className = 'game-card';
+        
+        let buttons = '';
+        if (game.id === 'poker' || game.id === 'durak') {
+            buttons = `<button class="game-action-btn" onclick="createTable('${game.id}')">Создать стол</button>`;
+        } else if (game.id === 'blackjack' || game.id === 'slots' || game.id === 'roulette') {
+            buttons = `<button class="game-action-btn" onclick="openGame('${game.id}')">Играть</button>`;
+        } else {
+            buttons = `<button class="game-action-btn">Играть</button>`;
+        }
+        
+        card.innerHTML = `
+            <div class="game-icon">${game.icon}</div>
+            <h3>${game.name}</h3>
+            <p>${game.description}</p>
+            ${buttons}
+        `;
+        container.appendChild(card);
+    });
+}
+
+// ============================================// БЛЭКДЖЕК
+// ============================================
+let bjGame = {
+    deck: [],
+    playerHand: [],
+    dealerHand: [],
+    bet: 0
+};
+
+function createDeck() {
+    const suits = ['♠️', '♥️', '♦️', '♣️'];
+    const ranks = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
+    const deck = [];
+    
+    for (let suit of suits) {
+        for (let rank of ranks) {
+            let value = parseInt(rank);
+            if (['J', 'Q', 'K'].includes(rank)) value = 10;
+            if (rank === 'A') value = 11;
+            deck.push({ rank, suit, value });
+        }
+    }
+    
+    return deck.sort(() => Math.random() - 0.5);
+}
+
+function calculateScore(hand) {
+    let score = hand.reduce((sum, card) => sum + card.value, 0);
+    let aces = hand.filter(card => card.rank === 'A').length;
+    
+    while (score > 21 && aces > 0) {
+        score -= 10;
+        aces--;
+    }
+    
+    return score;
+}
+
+function renderCard(card, hidden = false) {
+    if (hidden) return '<div class="card">❓</div>';
+    return `<div class="card">${card.rank}${card.suit}</div>`;
+}
+
+function updateBlackjackUI() {
+    const playerCards = document.getElementById('player-cards');
+    const dealerCards = document.getElementById('dealer-cards');
+    const playerScore = document.getElementById('player-score');
+    const dealerScore = document.getElementById('dealer-score');
+    
+    playerCards.innerHTML = bjGame.playerHand.map(c => renderCard(c)).join('');    dealerCards.innerHTML = bjGame.dealerHand.map((c, i) => 
+        renderCard(c, i === 1 && bjGame.dealerHand.length === 2)
+    ).join('');
+    
+    playerScore.innerText = calculateScore(bjGame.playerHand);
+    dealerScore.innerText = bjGame.dealerHand.length === 2 ? '?' : calculateScore(bjGame.dealerHand);
+}
+
+async function startBlackjack() {
+    const bet = parseInt(document.getElementById('bj-bet').value);
+    
+    if (!bet || bet < 10) {
+        tg.showAlert(' Минимальная ставка: 10 монет');
+        return;
+    }
+    
+    if (bet > currentBalance) {
+        tg.showAlert('❌ Недостаточно монет!');
+        return;
+    }
+    
+    // Списываем ставку
+    try {
+        await apiRequest('/transfer', 'POST', {
+            from_id: currentUser.id,
+            to_username: 'casino',
+            amount: bet,
+            comment: 'blackjack_bet'
+        });
+    } catch (error) {
+        // Если нет пользователя casino, просто продолжаем
+    }
+    
+    bjGame.bet = bet;
+    bjGame.deck = createDeck();
+    bjGame.playerHand = [bjGame.deck.pop(), bjGame.deck.pop()];
+    bjGame.dealerHand = [bjGame.deck.pop(), bjGame.deck.pop()];
+    
+    document.getElementById('bet-controls').style.display = 'none';
+    document.getElementById('play-controls').style.display = 'flex';
+    document.getElementById('bj-message').innerText = '';
+    
+    updateBlackjackUI();
+    
+    // Проверка на блэкджек
+    if (calculateScore(bjGame.playerHand) === 21) {
+        stand();
+    }
+}
+async function hit() {
+    bjGame.playerHand.push(bjGame.deck.pop());
+    updateBlackjackUI();
+    
+    const score = calculateScore(bjGame.playerHand);
+    
+    if (score > 21) {
+        endBlackjack('lose', 'Перебор! Вы проиграли.');
+    }
+}
+
+async function stand() {
+    // Ход дилера
+    while (calculateScore(bjGame.dealerHand) < 17) {
+        bjGame.dealerHand.push(bjGame.deck.pop());
+    }
+    
+    updateBlackjackUI();
+    
+    const playerScore = calculateScore(bjGame.playerHand);
+    const dealerScore = calculateScore(bjGame.dealerHand);
+    
+    if (dealerScore > 21 || playerScore > dealerScore) {
+        const winAmount = bjGame.bet * 2;
+        await apiRequest('/transfer', 'POST', {
+            from_id: 0,
+            to_username: currentUser.username,
+            amount: winAmount,
+            comment: 'blackjack_win'
+        });
+        endBlackjack('win', `Вы выиграли ${winAmount} монет!`);
+    } else if (playerScore === dealerScore) {
+        await apiRequest('/transfer', 'POST', {
+            from_id: 0,
+            to_username: currentUser.username,
+            amount: bjGame.bet,
+            comment: 'blackjack_draw'
+        });
+        endBlackjack('draw', 'Ничья! Ставка возвращена.');
+    } else {
+        endBlackjack('lose', 'Дилер выиграл!');
+    }
+}
+
+function endBlackjack(result, message) {
+    document.getElementById('play-controls').style.display = 'none';
+    document.getElementById('bet-controls').style.display = 'block';
+    
+    const msgEl = document.getElementById('bj-message');
+    msgEl.innerText = message;    msgEl.className = `game-message ${result}`;
+    
+    loadBalance();
+}
+
+// ============================================
+// СЛОТЫ
+// ============================================
+const slotSymbols = ['🍒', '🍋', '🍊', '', '💎', '7️', '🔔'];
+
+async function spinSlots() {
+    const bet = parseInt(document.getElementById('slots-bet').value);
+    
+    if (!bet || bet < 10) {
+        tg.showAlert('❌ Минимальная ставка: 10 монет');
+        return;
+    }
+    
+    if (bet > currentBalance) {
+        tg.showAlert('❌ Недостаточно монет!');
+        return;
+    }
+    
+    // Анимация
+    const reels = [document.getElementById('reel1'), document.getElementById('reel2'), document.getElementById('reel3')];
+    const msgEl = document.getElementById('slots-message');
+    msgEl.innerText = '';
+    
+    // Крутим барабаны
+    for (let i = 0; i < 10; i++) {
+        reels.forEach(reel => {
+            reel.innerText = slotSymbols[Math.floor(Math.random() * slotSymbols.length)];
+        });
+        await new Promise(resolve => setTimeout(resolve, 100));
+    }
+    
+    // Финальный результат
+    const result = [
+        slotSymbols[Math.floor(Math.random() * slotSymbols.length)],
+        slotSymbols[Math.floor(Math.random() * slotSymbols.length)],
+        slotSymbols[Math.floor(Math.random() * slotSymbols.length)]
+    ];
+    
+    reels.forEach((reel, i) => reel.innerText = result[i]);
+    
+    // Проверка выигрыша
+    let winAmount = 0;
+    let message = '';
+    
+    if (result[0] === result[1] === result[2]) {        if (result[0] === '7️⃣') {
+            winAmount = bet * 50;
+            message = `🎉 ДЖЕКПОТ 777! +${winAmount} монет!`;
+        } else {
+            winAmount = bet * 10;
+            message = `✨ ТРИ В РЯД! +${winAmount} монет!`;
+        }
+    } else if (result[0] === result[1] || result[1] === result[2] || result[0] === result[2]) {
+        winAmount = bet * 2;
+        message = `✅ Два совпадения! +${winAmount} монет!`;
+    } else {
+        message = '❌ Не повезло!';
+    }
+    
+    if (winAmount > 0) {
+        await apiRequest('/transfer', 'POST', {
+            from_id: 0,
+            to_username: currentUser.username,
+            amount: winAmount,
+            comment: 'slots_win'
+        });
+        msgEl.className = 'game-message win';
+    } else {
+        msgEl.className = 'game-message lose';
+    }
+    
+    msgEl.innerText = message;
+    loadBalance();
+}
+
+// ============================================
+// РУЛЕТКА
+// ============================================
+async function placeRouletteBet(choice) {
+    const bet = parseInt(document.getElementById('roulette-bet').value);
+    
+    if (!bet || bet < 10) {
+        tg.showAlert(' Минимальная ставка: 10 монет');
+        return;
+    }
+    
+    if (bet > currentBalance) {
+        tg.showAlert('❌ Недостаточно монет!');
+        return;
+    }
+    
+    const resultEl = document.getElementById('roulette-result');
+    const msgEl = document.getElementById('roulette-message');
+    msgEl.innerText = '';
+        // Анимация
+    resultEl.innerText = '🎡';
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    // Результат
+    const number = Math.floor(Math.random() * 37);
+    const colors = { 0: 'green', 1: 'red', 2: 'black' };
+    
+    // Определяем цвет
+    let color;
+    if (number === 0) color = 'green';
+    else if ([1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36].includes(number)) color = 'red';
+    else color = 'black';
+    
+    resultEl.innerText = number;
+    resultEl.style.color = color === 'red' ? '#e74c3c' : color === 'black' ? '#2c3e50' : '#27ae60';
+    
+    // Проверка выигрыша
+    let winAmount = 0;
+    let message = '';
+    
+    if (choice === color) {
+        const multiplier = color === 'green' ? 14 : 2;
+        winAmount = bet * multiplier;
+        message = ` Выпало ${number} (${color === 'red' ? 'красное' : color === 'black' ? 'чёрное' : 'зелёное'})! Вы выиграли ${winAmount} монет!`;
+    } else {
+        message = `😔 Выпало ${number} (${color === 'red' ? 'красное' : color === 'black' ? 'чёрное' : 'зелёное'}). Вы проиграли.`;
+    }
+    
+    if (winAmount > 0) {
+        await apiRequest('/transfer', 'POST', {
+            from_id: 0,
+            to_username: currentUser.username,
+            amount: winAmount,
+            comment: 'roulette_win'
+        });
+        msgEl.className = 'game-message win';
+    } else {
+        msgEl.className = 'game-message lose';
+    }
+    
+    msgEl.innerText = message;
+    loadBalance();
+                }
