@@ -16,7 +16,7 @@
                 <img src="" alt="Avatar" class="user-avatar" id="header-avatar">
                 <div class="user-details">
                     <div class="user-nickname" id="header-nickname">Загрузка...</div>
-                    <div class="user-status" id="header-status">Онлайн</div>
+                    <div class="user-status">Онлайн</div>
                 </div>
             </div>
             <div class="balance-display">
@@ -35,9 +35,7 @@
             <div class="main-grid">
                 <div class="top-container">
                     <h3>Топ:</h3>
-                    <div class="top-list" id="top-list">
-                        <!-- Сюда JavaScript вставит Топ-10 из бота -->
-                    </div>
+                    <div class="top-list" id="top-list"></div>
                 </div>
                 <div class="main-buttons">
                     <button class="main-btn" onclick="switchTab('games')">🎮 Игры</button>
@@ -47,35 +45,17 @@
                 </div>
             </div>
         </section>
+
         <!-- ИГРЫ -->
         <section id="tab-games" class="tab-content">
             <h2 class="section-title">Игры:</h2>
-            <div class="games-grid" id="games-list">
-                <!-- Игры будут загружаться из бота -->
-                <!-- Временные заглушки для основных игр -->
-                <div class="game-card">
-                    <div class="game-icon">🃏</div>
-                    <h3>Покер</h3>
-                    <p>Техасский Холдем</p>
-                    <button class="game-action-btn" onclick="createPokerTable()">Создать стол</button>
-                    <button class="game-secondary-btn">Быстрая игра</button>
-                </div>
-                <div class="game-card">
-                    <div class="game-icon">🃏</div>
-                    <h3>Дурак</h3>
-                    <p>Классический подкидной</p>
-                    <button class="game-action-btn" onclick="createDurakTable()">Создать стол</button>
-                    <button class="game-secondary-btn">Играть с ботом</button>
-                </div>
-            </div>
+            <div class="games-grid" id="games-list"></div>
         </section>
 
         <!-- КАТАЛОГ -->
         <section id="tab-catalog" class="tab-content">
             <h2 class="section-title">Каталог:</h2>
-            <div class="catalog-grid" id="catalog-list">
-                <!-- Товары будут загружаться из бота -->
-            </div>
+            <div class="catalog-grid" id="catalog-list"></div>
         </section>
 
         <!-- ПЕРЕВОДЫ -->
@@ -97,6 +77,7 @@
                 <button class="action-btn" onclick="sendTransfer()">Отправить перевод</button>
             </div>
         </section>
+
         <!-- ПРОФИЛЬ -->
         <section id="tab-profile" class="tab-content">
             <div class="profile-header">
@@ -106,24 +87,17 @@
             </div>
             <div class="profile-stats">
                 <div class="stat-card">
-                    <div class="stat-value" id="stat-wins">-</div>
-                    <div class="stat-label">Побед</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value" id="stat-losses">-</div>
-                    <div class="stat-label">Поражений</div>
+                    <div class="stat-value" id="stat-rank">-</div>
+                    <div class="stat-label">Место в топе</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-value" id="stat-games">-</div>
                     <div class="stat-label">Игр сыграно</div>
                 </div>
-            </div>
-            <div class="profile-section">
-                <h3>Достижения:</h3>
-                <div class="achievements-list" id="achievements-list">
-                    <!-- Достижения будут загружаться из бота -->
-                </div>
-            </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="stat-won">-</div>
+                    <div class="stat-label">Выиграно 💰</div>
+                </div>            </div>
             <button class="action-btn" style="margin-top: 20px;">Настройки</button>
         </section>
 
@@ -131,21 +105,22 @@
 
     <!-- Нижнее меню -->
     <nav class="bottom-nav">
-        <button class="nav-btn active" data-tab="main">🏠<br>Главная</button>
+        <button class="nav-btn active" data-tab="main"><br>Главная</button>
         <button class="nav-btn" data-tab="games">🎮<br>Игры</button>
         <button class="nav-btn" data-tab="catalog">📦<br>Каталог</button>
         <button class="nav-btn" data-tab="transfer">💸<br>Переводы</button>
         <button class="nav-btn" data-tab="profile">👤<br>Профиль</button>
     </nav>
 
-    <!-- Модальное окно для создания стола -->
+    <!-- Модальное окно -->
     <div id="modal-create-table" class="modal">
         <div class="modal-content">
             <h3>Создать игровой стол</h3>
             <div class="form-group">
                 <label>Количество игроков:</label>
                 <select id="table-players">
-                    <option value="2">2 игрока</option>                    <option value="3">3 игрока</option>
+                    <option value="2">2 игрока</option>
+                    <option value="3">3 игрока</option>
                     <option value="4">4 игрока</option>
                     <option value="6">6 игроков</option>
                 </select>
