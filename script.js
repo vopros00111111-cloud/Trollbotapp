@@ -79,21 +79,21 @@ async function loadBalance() {
         currentBalance = data.balance;
         
         document.getElementById('header-balance').innerText = `${currentBalance} 💰`;
-        document.getElementById('profile-balance').innerText = `${currentBalance} 💰`;
+        document.getElementById('profile-balance').innerText = `${currentBalance} `;
     } catch (error) {
         console.error('Ошибка загрузки баланса:', error);
         document.getElementById('header-balance').innerText = 'Ошибка 💰';
     }
 }
 
-// Загрузка статистики (место в топе, игры, выиграно)
+// Загрузка статистики
 async function loadStats() {
     try {
         const stats = await apiRequest(`/stats/${currentUser.id}`);
         
         document.getElementById('stat-rank').innerText = `#${stats.rank}`;
         document.getElementById('stat-games').innerText = stats.totalGames;
-        document.getElementById('stat-won').innerText = `${stats.totalWon.toLocaleString()} `;
+        document.getElementById('stat-won').innerText = `${stats.totalWon.toLocaleString()} 💰`;
     } catch (error) {
         console.error('Ошибка загрузки статистики:', error);
     }}
@@ -141,11 +141,12 @@ function renderTop(topList) {
     }
     
     topList.forEach((player, index) => {
-        const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}.`;
+        const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '' : `${index + 1}.`;
         const item = document.createElement('div');
         item.className = 'top-item';
         item.innerHTML = `
-            <span class="top-place">${medal}</span>            <span class="top-name">@${player.username}</span>
+            <span class="top-place">${medal}</span>
+            <span class="top-name">@${player.username}</span>
             <span class="top-score">${player.balance.toLocaleString()}</span>
         `;
         container.appendChild(item);
@@ -168,6 +169,8 @@ function renderGames(games) {
         let buttons = '';
         if (game.id === 'poker' || game.id === 'durak') {
             buttons = `<button class="game-action-btn" onclick="createTable('${game.id}')">Создать стол</button>`;
+        } else if (game.id === 'blackjack' || game.id === 'slots' || game.id === 'roulette') {
+            buttons = `<button class="game-action-btn" onclick="openGame('${game.id}')">Играть</button>`;
         } else {
             buttons = `<button class="game-action-btn">Играть</button>`;
         }
@@ -191,14 +194,15 @@ function renderCatalog(items) {
         return;
     }
     
-    items.forEach(item => {        const card = document.createElement('div');
+    items.forEach(item => {
+        const card = document.createElement('div');
         card.className = 'catalog-item';
         card.innerHTML = `
             <div class="catalog-icon">📦</div>
             <div class="catalog-info">
                 <h4>${item.name}</h4>
                 <p>${item.description}</p>
-                <div class="catalog-price">${item.price.toLocaleString()} 💰</div>
+                <div class="catalog-price">${item.price.toLocaleString()} </div>
             </div>
         `;
         container.appendChild(card);
@@ -255,7 +259,7 @@ async function confirmCreateTable() {
     }
     
     if (bet > currentBalance) {
-        tg.showAlert('❌ Недостаточно монет!');
+        tg.showAlert(' Недостаточно монет!');
         return;
     }
     
@@ -283,14 +287,14 @@ async function sendTransfer() {
     const comment = document.getElementById('transfer-comment').value.trim();
     
     if (!to) {
-        tg.showAlert('❌ Введите получателя (@username)');
+        tg.showAlert(' Введите получателя (@username)');
         return;
     }
     
     if (!amount || amount <= 0) {
         tg.showAlert(' Введите корректную сумму');
-        return;    }
-    
+        return;
+    }    
     if (amount > currentBalance) {
         tg.showAlert('❌ Недостаточно монет!');
         return;
@@ -318,26 +322,6 @@ async function sendTransfer() {
 }
 
 // ============================================
-// ИНИЦИАЛИЗАЦИЯ
-// ============================================
-window.addEventListener('load', async () => {
-    console.log('🚀 Приложение загружено');
-    
-    initUser();
-    
-    if (currentUser) {
-        await Promise.all([
-            loadBalance(),
-            loadStats(),
-            loadTop(),
-            loadGames(),
-            loadCatalog()
-        ]);
-    }
-    
-    console.log('✅ Все данные загружены');
-});
-// ============================================
 // ИГРЫ В WEB APP
 // ============================================
 
@@ -353,46 +337,14 @@ function closeGame(gameName) {
     document.getElementById('tab-games').classList.add('active');
 }
 
-// Обновить renderGames для открытия игр
-function renderGames(games) {
-    const container = document.getElementById('games-list');
-    container.innerHTML = '';
-    
-    if (!games || games.length === 0) {
-        container.innerHTML = '<div style="text-align:center; padding:20px; color:#888;">Нет доступных игр</div>';
-        return;
-    }
-    
-    games.forEach(game => {
-        const card = document.createElement('div');
-        card.className = 'game-card';
-        
-        let buttons = '';
-        if (game.id === 'poker' || game.id === 'durak') {
-            buttons = `<button class="game-action-btn" onclick="createTable('${game.id}')">Создать стол</button>`;
-        } else if (game.id === 'blackjack' || game.id === 'slots' || game.id === 'roulette') {
-            buttons = `<button class="game-action-btn" onclick="openGame('${game.id}')">Играть</button>`;
-        } else {
-            buttons = `<button class="game-action-btn">Играть</button>`;
-        }
-        
-        card.innerHTML = `
-            <div class="game-icon">${game.icon}</div>
-            <h3>${game.name}</h3>
-            <p>${game.description}</p>
-            ${buttons}
-        `;
-        container.appendChild(card);
-    });
-}
-
-// ============================================// БЛЭКДЖЕК
+// ============================================
+// БЛЭКДЖЕК
 // ============================================
 let bjGame = {
     deck: [],
     playerHand: [],
-    dealerHand: [],
-    bet: 0
+    dealerHand: [],    bet: 0,
+    gameOver: false
 };
 
 function createDeck() {
@@ -425,8 +377,9 @@ function calculateScore(hand) {
 }
 
 function renderCard(card, hidden = false) {
-    if (hidden) return '<div class="card">❓</div>';
-    return `<div class="card">${card.rank}${card.suit}</div>`;
+    if (hidden) return '<div class="card hidden">❓</div>';
+    const isRed = card.suit === '♥️' || card.suit === '♦️';
+    return `<div class="card ${isRed ? 'red' : 'black'}">${card.rank}${card.suit}</div>`;
 }
 
 function updateBlackjackUI() {
@@ -435,19 +388,19 @@ function updateBlackjackUI() {
     const playerScore = document.getElementById('player-score');
     const dealerScore = document.getElementById('dealer-score');
     
-    playerCards.innerHTML = bjGame.playerHand.map(c => renderCard(c)).join('');    dealerCards.innerHTML = bjGame.dealerHand.map((c, i) => 
-        renderCard(c, i === 1 && bjGame.dealerHand.length === 2)
+    playerCards.innerHTML = bjGame.playerHand.map(c => renderCard(c)).join('');
+    dealerCards.innerHTML = bjGame.dealerHand.map((c, i) => 
+        renderCard(c, i === 1 && bjGame.dealerHand.length === 2 && !bjGame.gameOver)
     ).join('');
-    
-    playerScore.innerText = calculateScore(bjGame.playerHand);
-    dealerScore.innerText = bjGame.dealerHand.length === 2 ? '?' : calculateScore(bjGame.dealerHand);
+        playerScore.innerText = calculateScore(bjGame.playerHand);
+    dealerScore.innerText = bjGame.dealerHand.length === 2 && !bjGame.gameOver ? '?' : calculateScore(bjGame.dealerHand);
 }
 
 async function startBlackjack() {
     const bet = parseInt(document.getElementById('bj-bet').value);
     
     if (!bet || bet < 10) {
-        tg.showAlert(' Минимальная ставка: 10 монет');
+        tg.showAlert('❌ Минимальная ставка: 10 монет');
         return;
     }
     
@@ -456,7 +409,7 @@ async function startBlackjack() {
         return;
     }
     
-    // Списываем ставку
+    // Списываем ставку через API
     try {
         await apiRequest('/transfer', 'POST', {
             from_id: currentUser.id,
@@ -472,60 +425,72 @@ async function startBlackjack() {
     bjGame.deck = createDeck();
     bjGame.playerHand = [bjGame.deck.pop(), bjGame.deck.pop()];
     bjGame.dealerHand = [bjGame.deck.pop(), bjGame.deck.pop()];
+    bjGame.gameOver = false;
     
     document.getElementById('bet-controls').style.display = 'none';
     document.getElementById('play-controls').style.display = 'flex';
     document.getElementById('bj-message').innerText = '';
+    document.getElementById('bj-message').className = 'game-message';
     
     updateBlackjackUI();
     
     // Проверка на блэкджек
     if (calculateScore(bjGame.playerHand) === 21) {
-        stand();
+        setTimeout(() => stand(), 500);
     }
 }
+
 async function hit() {
+    if (bjGame.gameOver) return;    
     bjGame.playerHand.push(bjGame.deck.pop());
     updateBlackjackUI();
     
     const score = calculateScore(bjGame.playerHand);
     
     if (score > 21) {
+        bjGame.gameOver = true;
         endBlackjack('lose', 'Перебор! Вы проиграли.');
     }
 }
 
 async function stand() {
+    if (bjGame.gameOver) return;
+    
+    bjGame.gameOver = true;
+    
     // Ход дилера
     while (calculateScore(bjGame.dealerHand) < 17) {
         bjGame.dealerHand.push(bjGame.deck.pop());
+        await new Promise(resolve => setTimeout(resolve, 500));
+        updateBlackjackUI();
     }
-    
-    updateBlackjackUI();
     
     const playerScore = calculateScore(bjGame.playerHand);
     const dealerScore = calculateScore(bjGame.dealerHand);
     
     if (dealerScore > 21 || playerScore > dealerScore) {
         const winAmount = bjGame.bet * 2;
-        await apiRequest('/transfer', 'POST', {
-            from_id: 0,
-            to_username: currentUser.username,
-            amount: winAmount,
-            comment: 'blackjack_win'
-        });
-        endBlackjack('win', `Вы выиграли ${winAmount} монет!`);
+        try {
+            await apiRequest('/transfer', 'POST', {
+                from_id: 0,
+                to_username: currentUser.username,
+                amount: winAmount,
+                comment: 'blackjack_win'
+            });
+        } catch (error) {}
+        endBlackjack('win', `🎉 Вы выиграли ${winAmount} монет!`);
     } else if (playerScore === dealerScore) {
-        await apiRequest('/transfer', 'POST', {
-            from_id: 0,
-            to_username: currentUser.username,
-            amount: bjGame.bet,
-            comment: 'blackjack_draw'
-        });
-        endBlackjack('draw', 'Ничья! Ставка возвращена.');
+        try {
+            await apiRequest('/transfer', 'POST', {
+                from_id: 0,
+                to_username: currentUser.username,
+                amount: bjGame.bet,
+                comment: 'blackjack_draw'
+            });
+        } catch (error) {}
+        endBlackjack('draw', '🤝 Ничья! Ставка возвращена.');
     } else {
-        endBlackjack('lose', 'Дилер выиграл!');
-    }
+        endBlackjack('lose', ' Дилер выиграл!');    }
 }
 
 function endBlackjack(result, message) {
@@ -533,15 +498,17 @@ function endBlackjack(result, message) {
     document.getElementById('bet-controls').style.display = 'block';
     
     const msgEl = document.getElementById('bj-message');
-    msgEl.innerText = message;    msgEl.className = `game-message ${result}`;
+    msgEl.innerText = message;
+    msgEl.className = `game-message ${result}`;
     
+    updateBlackjackUI();
     loadBalance();
 }
 
 // ============================================
 // СЛОТЫ
 // ============================================
-const slotSymbols = ['🍒', '🍋', '🍊', '', '💎', '7️', '🔔'];
+const slotSymbols = ['🍒', '🍋', '🍊', '🍇', '💎', '7️⃣', '🔔'];
 
 async function spinSlots() {
     const bet = parseInt(document.getElementById('slots-bet').value);
@@ -556,12 +523,11 @@ async function spinSlots() {
         return;
     }
     
-    // Анимация
     const reels = [document.getElementById('reel1'), document.getElementById('reel2'), document.getElementById('reel3')];
     const msgEl = document.getElementById('slots-message');
     msgEl.innerText = '';
     
-    // Крутим барабаны
+    // Анимация
     for (let i = 0; i < 10; i++) {
         reels.forEach(reel => {
             reel.innerText = slotSymbols[Math.floor(Math.random() * slotSymbols.length)];
@@ -582,7 +548,8 @@ async function spinSlots() {
     let winAmount = 0;
     let message = '';
     
-    if (result[0] === result[1] === result[2]) {        if (result[0] === '7️⃣') {
+    if (result[0] === result[1] && result[1] === result[2]) {
+        if (result[0] === '7️⃣') {
             winAmount = bet * 50;
             message = `🎉 ДЖЕКПОТ 777! +${winAmount} монет!`;
         } else {
@@ -597,12 +564,14 @@ async function spinSlots() {
     }
     
     if (winAmount > 0) {
-        await apiRequest('/transfer', 'POST', {
-            from_id: 0,
-            to_username: currentUser.username,
-            amount: winAmount,
-            comment: 'slots_win'
-        });
+        try {
+            await apiRequest('/transfer', 'POST', {
+                from_id: 0,
+                to_username: currentUser.username,
+                amount: winAmount,
+                comment: 'slots_win'
+            });
+        } catch (error) {}
         msgEl.className = 'game-message win';
     } else {
         msgEl.className = 'game-message lose';
@@ -619,9 +588,8 @@ async function placeRouletteBet(choice) {
     const bet = parseInt(document.getElementById('roulette-bet').value);
     
     if (!bet || bet < 10) {
-        tg.showAlert(' Минимальная ставка: 10 монет');
-        return;
-    }
+        tg.showAlert('❌ Минимальная ставка: 10 монет');
+        return;    }
     
     if (bet > currentBalance) {
         tg.showAlert('❌ Недостаточно монет!');
@@ -631,9 +599,12 @@ async function placeRouletteBet(choice) {
     const resultEl = document.getElementById('roulette-result');
     const msgEl = document.getElementById('roulette-message');
     msgEl.innerText = '';
-        // Анимация
+    
+    // Анимация вращения
     resultEl.innerText = '🎡';
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    resultEl.style.animation = 'spin 2s ease-out';
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    resultEl.style.animation = '';
     
     // Результат
     const number = Math.floor(Math.random() * 37);
@@ -655,18 +626,20 @@ async function placeRouletteBet(choice) {
     if (choice === color) {
         const multiplier = color === 'green' ? 14 : 2;
         winAmount = bet * multiplier;
-        message = ` Выпало ${number} (${color === 'red' ? 'красное' : color === 'black' ? 'чёрное' : 'зелёное'})! Вы выиграли ${winAmount} монет!`;
+        message = `🎉 Выпало ${number} (${color === 'red' ? 'красное' : color === 'black' ? 'чёрное' : 'зелёное'})! Вы выиграли ${winAmount} монет!`;
     } else {
         message = `😔 Выпало ${number} (${color === 'red' ? 'красное' : color === 'black' ? 'чёрное' : 'зелёное'}). Вы проиграли.`;
     }
     
     if (winAmount > 0) {
-        await apiRequest('/transfer', 'POST', {
-            from_id: 0,
-            to_username: currentUser.username,
-            amount: winAmount,
-            comment: 'roulette_win'
-        });
+        try {
+            await apiRequest('/transfer', 'POST', {
+                from_id: 0,
+                to_username: currentUser.username,
+                amount: winAmount,
+                comment: 'roulette_win'
+            });
+        } catch (error) {}
         msgEl.className = 'game-message win';
     } else {
         msgEl.className = 'game-message lose';
@@ -674,4 +647,25 @@ async function placeRouletteBet(choice) {
     
     msgEl.innerText = message;
     loadBalance();
-                }
+}
+
+// ============================================
+// ИНИЦИАЛИЗАЦИЯ
+// ============================================
+window.addEventListener('load', async () => {
+    console.log('🚀 Приложение загружено');
+    
+    initUser();
+    
+    if (currentUser) {
+        await Promise.all([
+            loadBalance(),
+            loadStats(),
+            loadTop(),
+            loadGames(),
+            loadCatalog()
+        ]);
+    }
+    
+    console.log('✅ Все данные загружены');
+});
