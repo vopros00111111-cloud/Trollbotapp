@@ -5,80 +5,212 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>BlessCoin App</title>
     <link rel="stylesheet" href="style.css">
-    <!-- Подключаем официальный скрипт Телеграма -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
 
-    <!-- Верхняя шапка (Баланс) -->
+    <!-- Шапка -->
     <header class="app-header">
-        <div class="balance-container">
-            <span class="balance-label">Твой баланс:</span>
-            <span class="balance-amount" id="user-balance">0 💰</span>
+        <div class="header-top">
+            <div class="user-info">
+                <img src="https://via.placeholder.com/50" alt="Avatar" class="user-avatar" id="header-avatar">
+                <div class="user-details">
+                    <div class="user-nickname" id="header-nickname">Загрузка...</div>
+                    <div class="user-status">Онлайн</div>
+                </div>
+            </div>
+            <div class="balance-display">
+                <div class="balance-label">Баланс:</div>
+                <div class="balance-amount" id="header-balance">0 💰</div>
+            </div>
         </div>
     </header>
 
-    <!-- Основной контент (Экраны) -->
+    <!-- Основной контент -->
     <main class="app-content">
         
-        <!-- Экран Казино -->
-        <section id="tab-casino" class="tab-content active">
-            <h2>🎰 Казино</h2>
-            <div class="placeholder-box">
-                <p>Здесь будут слоты, рулетка и краш-игра</p>
-                <button class="game-btn">Слоты (Скоро)</button>
+        <!-- ГЛАВНАЯ -->
+        <section id="tab-main" class="tab-content active">
+            <h2 class="section-title">Главная:</h2>
+            <div class="main-grid">
+                <div class="top-container">
+                    <h3>Топ:</h3>
+                    <div class="top-list" id="top-list">
+                        <div class="top-item"><span class="top-place">1</span><span class="top-name">@player1</span><span class="top-score">10000</span></div>
+                        <div class="top-item"><span class="top-place">2</span><span class="top-name">@player2</span><span class="top-score">8500</span></div>
+                        <div class="top-item"><span class="top-place">3</span><span class="top-name">@player3</span><span class="top-score">7200</span></div>
+                        <div class="top-item"><span class="top-place">4</span><span class="top-name">@player4</span><span class="top-score">6100</span></div>
+                        <div class="top-item"><span class="top-place">5</span><span class="top-name">@player5</span><span class="top-score">5000</span></div>
+                        <div class="top-item"><span class="top-place">6</span><span class="top-name">@player6</span><span class="top-score">4200</span></div>
+                        <div class="top-item"><span class="top-place">7</span><span class="top-name">@player7</span><span class="top-score">3500</span></div>
+                        <div class="top-item"><span class="top-place">8</span><span class="top-name">@player8</span><span class="top-score">2800</span></div>
+                        <div class="top-item"><span class="top-place">9</span><span class="top-name">@player9</span><span class="top-score">2100</span></div>
+                        <div class="top-item"><span class="top-place">10</span><span class="top-name">@player10</span><span class="top-score">1500</span></div>
+                    </div>
+                </div>                <div class="main-buttons">
+                    <button class="main-btn" onclick="switchTab('games')">🎮 Игры</button>
+                    <button class="main-btn" onclick="switchTab('transfer')">💸 Переводы</button>
+                    <button class="main-btn" onclick="switchTab('profile')">👤 Профиль</button>
+                    <button class="main-btn" onclick="switchTab('catalog')">📦 Каталог</button>
+                </div>
             </div>
         </section>
 
-        <!-- Экран Покер -->
-        <section id="tab-poker" class="tab-content">
-            <h2>🃏 Покер</h2>
-            <div class="placeholder-box">
-                <p>Техасский холдем</p>
-                <button class="game-btn">Найти стол</button>
+        <!-- ИГРЫ -->
+        <section id="tab-games" class="tab-content">
+            <h2 class="section-title">Игры:</h2>
+            <div class="games-grid">
+                <div class="game-card">
+                    <div class="game-icon">🃏</div>
+                    <h3>Покер</h3>
+                    <p>Техасский Холдем</p>
+                    <button class="game-action-btn" onclick="createPokerTable()">Создать стол</button>
+                    <button class="game-secondary-btn">Быстрая игра</button>
+                </div>
+                <div class="game-card">
+                    <div class="game-icon">🃏</div>
+                    <h3>Дурак</h3>
+                    <p>Классический подкидной</p>
+                    <button class="game-action-btn" onclick="createDurakTable()">Создать стол</button>
+                    <button class="game-secondary-btn">Играть с ботом</button>
+                </div>
+                <div class="game-card">
+                    <div class="game-icon">🎰</div>
+                    <h3>Слоты</h3>
+                    <p>Игровой автомат</p>
+                    <button class="game-action-btn">Играть</button>
+                </div>
+                <div class="game-card">
+                    <div class="game-icon">🎲</div>
+                    <h3>Кости</h3>
+                    <p>Бросай кубики</p>
+                    <button class="game-action-btn">Играть</button>
+                </div>
+                <div class="game-card">
+                    <div class="game-icon">🎯</div>
+                    <h3>Рулетка</h3>
+                    <p>Красное/Чёрное</p>
+                    <button class="game-action-btn">Играть</button>
+                </div>
+                <div class="game-card">
+                    <div class="game-icon">📝</div>
+                    <h3>Слова</h3>
+                    <p>Игра в слова</p>
+                    <button class="game-action-btn">Найти соперника</button>
+                </div>
             </div>
         </section>
 
-        <!-- Экран Дурак -->
-        <section id="tab-durak" class="tab-content">
-            <h2>🃏 Дурак</h2>
-            <div class="placeholder-box">
-                <p>Классический подкидной</p>
-                <button class="game-btn">Играть с ботом</button>
+        <!-- КАТАЛОГ -->
+        <section id="tab-catalog" class="tab-content">
+            <h2 class="section-title">Каталог:</h2>
+            <div class="catalog-grid">
+                <div class="catalog-item">
+                    <div class="catalog-icon">🎁</div>
+                    <div class="catalog-info">
+                        <h4>Бустер удачи</h4>
+                        <p>+10% к выигрышу на 1 час</p>
+                        <div class="catalog-price">500 💰</div>
+                    </div>
+                    <button class="buy-btn">Купить</button>
+                </div>
+                <div class="catalog-item">
+                    <div class="catalog-icon">🛡️</div>
+                    <div class="catalog-info">
+                        <h4>Щит от банкротства</h4>
+                        <p>Защита от потери монет</p>
+                        <div class="catalog-price">1000 💰</div>
+                    </div>
+                    <button class="buy-btn">Купить</button>
+                </div>
             </div>
         </section>
 
-        <!-- Экран Переводы -->
+        <!-- ПЕРЕВОДЫ -->
         <section id="tab-transfer" class="tab-content">
-            <h2>💸 Переводы</h2>
-            <div class="placeholder-box">
-                <p>Отправить монеты другу</p>
-                <input type="text" placeholder="@username">
-                <input type="number" placeholder="Сумма">
-                <button class="action-btn">Перевести</button>
+            <h2 class="section-title">Переводы:</h2>
+            <div class="transfer-form">
+                <div class="form-group">
+                    <label>Получатель:</label>
+                    <input type="text" placeholder="@username" id="transfer-to">
+                </div>
+                <div class="form-group">
+                    <label>Сумма:</label>
+                    <input type="number" placeholder="Количество монет" id="transfer-amount">
+                </div>
+                <div class="form-group">
+                    <label>Комментарий (необязательно):</label>
+                    <input type="text" placeholder="Сообщение" id="transfer-comment">
+                </div>
+                <button class="action-btn" onclick="sendTransfer()">Отправить перевод</button>
             </div>
         </section>
 
-        <!-- Экран Профиль -->
-        <section id="tab-profile" class="tab-content">
-            <h2>👤 Профиль</h2>
-            <div class="placeholder-box">
-                <p id="user-name">Загрузка...</p>
-                <p>Статистика побед и поражений</p>
-                <button class="action-btn">Настройки</button>
+        <!-- ПРОФИЛЬ -->        <section id="tab-profile" class="tab-content">
+            <div class="profile-header">
+                <img src="https://via.placeholder.com/100" alt="Avatar" class="profile-avatar" id="profile-avatar">
+                <h2 class="profile-nickname" id="profile-nickname">Загрузка...</h2>
+                <div class="profile-balance" id="profile-balance">0 💰</div>
             </div>
+            <div class="profile-stats">
+                <div class="stat-card">
+                    <div class="stat-value" id="stat-wins">0</div>
+                    <div class="stat-label">Побед</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="stat-losses">0</div>
+                    <div class="stat-label">Поражений</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="stat-games">0</div>
+                    <div class="stat-label">Игр сыграно</div>
+                </div>
+            </div>
+            <div class="profile-section">
+                <h3>Достижения:</h3>
+                <div class="achievements-list">
+                    <div class="achievement">🏆 Первый выигрыш</div>
+                    <div class="achievement">💰 Богач (10000 монет)</div>
+                    <div class="achievement">🎰 Азартный (100 игр)</div>
+                </div>
+            </div>
+            <button class="action-btn" style="margin-top: 20px;">Настройки</button>
         </section>
 
     </main>
 
-    <!-- Нижнее меню навигации -->
+    <!-- Нижнее меню -->
     <nav class="bottom-nav">
-        <button class="nav-btn active" data-tab="casino">🎰<br>Казино</button>
-        <button class="nav-btn" data-tab="poker">🃏<br>Покер</button>
-        <button class="nav-btn" data-tab="durak">🃏<br>Дурак</button>
-        <button class="nav-btn" data-tab="transfer">💱<br>Перевод</button>
+        <button class="nav-btn active" data-tab="main">🏠<br>Главная</button>
+        <button class="nav-btn" data-tab="games">🎮<br>Игры</button>
+        <button class="nav-btn" data-tab="catalog">📦<br>Каталог</button>
+        <button class="nav-btn" data-tab="transfer">💸<br>Переводы</button>
         <button class="nav-btn" data-tab="profile">👤<br>Профиль</button>
     </nav>
+
+    <!-- Модальное окно для создания стола -->
+    <div id="modal-create-table" class="modal">
+        <div class="modal-content">
+            <h3>Создать игровой стол</h3>
+            <div class="form-group">
+                <label>Количество игроков:</label>
+                <select id="table-players">
+                    <option value="2">2 игрока</option>
+                    <option value="3">3 игрока</option>
+                    <option value="4">4 игрока</option>
+                    <option value="6">6 игроков</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Ставка (монет):</label>
+                <input type="number" id="table-bet" placeholder="Минимум 100">
+            </div>
+            <div class="modal-buttons">
+                <button class="cancel-btn" onclick="closeModal()">Отмена</button>
+                <button class="confirm-btn" onclick="confirmCreateTable()">Создать</button>
+            </div>
+        </div>
+    </div>
 
     <script src="script.js"></script>
 </body>
