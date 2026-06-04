@@ -1,7 +1,7 @@
 // ============================================
 // КОНФИГУРАЦИЯ
 // ============================================
-const API_URL = 'https://trollbot-mml4.onrender.com/api'; // ️ ЗАМЕНИ НА СВОЙ RENDER URL
+const API_URL = 'https://trollbot-mml4.onrender.com/api';
 
 // ============================================
 // ИНИЦИАЛИЗАЦИЯ TELEGRAM WEBAPP
@@ -47,16 +47,12 @@ function initUser() {
 }
 
 // ============================================
-// API ЗАПРОСЫ К PYTHON-БОТУ// ============================================
-
-// Универсальная функция для запросов
+// API ЗАПРОСЫ// ============================================
 async function apiRequest(endpoint, method = 'GET', data = null) {
     try {
         const options = {
             method: method,
-            headers: {
-                'Content-Type': 'application/json'
-            }
+            headers: { 'Content-Type': 'application/json' }
         };
         
         if (data && method !== 'GET') {
@@ -90,17 +86,17 @@ async function loadBalance() {
     }
 }
 
-// Загрузка статистики
+// Загрузка статистики (место в топе, игры, выиграно)
 async function loadStats() {
     try {
         const stats = await apiRequest(`/stats/${currentUser.id}`);
         
-        document.getElementById('stat-wins').innerText = stats.wins || 0;
-        document.getElementById('stat-losses').innerText = stats.losses || 0;        document.getElementById('stat-games').innerText = stats.totalGames || 0;
+        document.getElementById('stat-rank').innerText = `#${stats.rank}`;
+        document.getElementById('stat-games').innerText = stats.totalGames;
+        document.getElementById('stat-won').innerText = `${stats.totalWon.toLocaleString()} `;
     } catch (error) {
         console.error('Ошибка загрузки статистики:', error);
-    }
-}
+    }}
 
 // Загрузка топа
 async function loadTop() {
@@ -109,6 +105,16 @@ async function loadTop() {
         renderTop(top);
     } catch (error) {
         console.error('Ошибка загрузки топа:', error);
+    }
+}
+
+// Загрузка игр
+async function loadGames() {
+    try {
+        const games = await apiRequest('/games');
+        renderGames(games);
+    } catch (error) {
+        console.error('Ошибка загрузки игр:', error);
     }
 }
 
@@ -122,55 +128,9 @@ async function loadCatalog() {
     }
 }
 
-// Загрузка достижений
-async function loadAchievements() {
-    try {
-        const achievements = await apiRequest(`/achievements/${currentUser.id}`);
-        renderAchievements(achievements);
-    } catch (error) {
-        console.error('Ошибка загрузки достижений:', error);
-    }
-}
-
-// Отправка перевода
-async function sendTransferAPI(to, amount, comment) {
-    try {
-        const data = {
-            from_id: currentUser.id,
-            to_username: to,
-            amount: amount,
-            comment: comment
-        };
-        
-        const result = await apiRequest('/transfer', 'POST', data);
-        return result;
-    } catch (error) {
-        console.error('Ошибка перевода:', error);        throw error;
-    }
-}
-
-// Создание стола
-async function createTableAPI(game, players, bet) {
-    try {
-        const data = {
-            user_id: currentUser.id,
-            game: game,
-            players: players,
-            bet: bet
-        };
-        
-        const result = await apiRequest('/create-table', 'POST', data);
-        return result;
-    } catch (error) {
-        console.error('Ошибка создания стола:', error);
-        throw error;
-    }
-}
-
 // ============================================
-// ФУНКЦИИ ОТРИСОВКИ
+// ОТРИСОВКА
 // ============================================
-
 function renderTop(topList) {
     const container = document.getElementById('top-list');
     container.innerHTML = '';
@@ -185,27 +145,59 @@ function renderTop(topList) {
         const item = document.createElement('div');
         item.className = 'top-item';
         item.innerHTML = `
-            <span class="top-place">${medal}</span>
-            <span class="top-name">@${player.username}</span>
+            <span class="top-place">${medal}</span>            <span class="top-name">@${player.username}</span>
             <span class="top-score">${player.balance.toLocaleString()}</span>
         `;
         container.appendChild(item);
     });
 }
 
+function renderGames(games) {
+    const container = document.getElementById('games-list');
+    container.innerHTML = '';
+    
+    if (!games || games.length === 0) {
+        container.innerHTML = '<div style="text-align:center; padding:20px; color:#888;">Нет доступных игр</div>';
+        return;
+    }
+    
+    games.forEach(game => {
+        const card = document.createElement('div');
+        card.className = 'game-card';
+        
+        let buttons = '';
+        if (game.id === 'poker' || game.id === 'durak') {
+            buttons = `
+                <button class="game-action-btn" onclick="createTable('${game.id}')">Создать стол</button>
+                <button class="game-secondary-btn">Быстрая игра</button>
+            `;
+        } else {
+            buttons = `<button class="game-action-btn">Играть</button>`;
+        }
+        
+        card.innerHTML = `
+            <div class="game-icon">${game.icon}</div>
+            <h3>${game.name}</h3>
+            <p>${game.description}</p>
+            ${buttons}
+        `;
+        container.appendChild(card);
+    });
+}
+
 function renderCatalog(items) {
-    const container = document.getElementById('catalog-list');    container.innerHTML = '';
+    const container = document.getElementById('catalog-list');
+    container.innerHTML = '';
     
     if (!items || items.length === 0) {
         container.innerHTML = '<div style="text-align:center; padding:20px; color:#888;">Каталог пуст</div>';
         return;
     }
     
-    items.forEach(item => {
-        const card = document.createElement('div');
+    items.forEach(item => {        const card = document.createElement('div');
         card.className = 'catalog-item';
         card.innerHTML = `
-            <div class="catalog-icon">${item.icon}</div>
+            <div class="catalog-icon">📦</div>
             <div class="catalog-info">
                 <h4>${item.name}</h4>
                 <p>${item.description}</p>
@@ -213,23 +205,6 @@ function renderCatalog(items) {
             </div>
         `;
         container.appendChild(card);
-    });
-}
-
-function renderAchievements(achievements) {
-    const container = document.getElementById('achievements-list');
-    container.innerHTML = '';
-    
-    if (!achievements || achievements.length === 0) {
-        container.innerHTML = '<div style="color:#888;">Нет достижений</div>';
-        return;
-    }
-    
-    achievements.forEach(achievement => {
-        const div = document.createElement('div');
-        div.className = 'achievement';
-        div.innerText = achievement;
-        container.appendChild(div);
     });
 }
 
@@ -243,7 +218,8 @@ navButtons.forEach(btn => {
     btn.addEventListener('click', () => {
         navButtons.forEach(b => b.classList.remove('active'));
         tabContents.forEach(t => t.classList.remove('active'));
-                btn.classList.add('active');
+        
+        btn.classList.add('active');
         const tabId = btn.getAttribute('data-tab');
         document.getElementById(`tab-${tabId}`).classList.add('active');
     });
@@ -264,16 +240,10 @@ function switchTab(tabName) {
 // ============================================
 // МОДАЛЬНОЕ ОКНО
 // ============================================
-function createPokerTable() {
-    currentGameType = 'poker';
+function createTable(gameType) {
+    currentGameType = gameType;
     document.getElementById('modal-create-table').classList.add('active');
 }
-
-function createDurakTable() {
-    currentGameType = 'durak';
-    document.getElementById('modal-create-table').classList.add('active');
-}
-
 function closeModal() {
     document.getElementById('modal-create-table').classList.remove('active');
 }
@@ -288,19 +258,23 @@ async function confirmCreateTable() {
     }
     
     if (bet > currentBalance) {
-        tg.showAlert(' Недостаточно монет!');
+        tg.showAlert('❌ Недостаточно монет!');
         return;
     }
     
-    try {        const result = await createTableAPI(currentGameType, players, bet);
-        closeModal();
-        tg.showAlert(`✅ Стол создан!\n\n🎮 Игра: ${currentGameType === 'poker' ? 'Покер' : 'Дурак'}\n👥 Игроков: ${players}\n💰 Ставка: ${bet} монет\n\nПриглашение отправлено в чат!`);
-        
-        // Обновляем баланс
-        await loadBalance();
-    } catch (error) {
-        tg.showAlert('❌ Ошибка создания стола');
-    }
+    const data = {
+        action: 'create_table',
+        game: currentGameType,
+        players: players,
+        bet: bet,
+        user_id: currentUser.id
+    };
+    
+    tg.sendData(JSON.stringify(data));
+    closeModal();
+    
+    const gameName = currentGameType === 'poker' ? 'Покер' : 'Дурак';
+    tg.showAlert(`✅ Стол создан!\n\n🎮 Игра: ${gameName}\n👥 Игроков: ${players}\n💰 Ставка: ${bet} монет\n\nПриглашение отправлено в чат!`);
 }
 
 // ============================================
@@ -317,30 +291,35 @@ async function sendTransfer() {
     }
     
     if (!amount || amount <= 0) {
-        tg.showAlert('❌ Введите корректную сумму');
-        return;
-    }
+        tg.showAlert(' Введите корректную сумму');
+        return;    }
     
     if (amount > currentBalance) {
         tg.showAlert('❌ Недостаточно монет!');
         return;
     }
     
+    const data = {
+        from_id: currentUser.id,
+        to_username: to,
+        amount: amount,
+        comment: comment
+    };
+    
     try {
-        const result = await sendTransferAPI(to, amount, comment);
+        await apiRequest('/transfer', 'POST', data);
         tg.showAlert(`✅ Перевод выполнен!\n\n👤 Получатель: ${to}\n💰 Сумма: ${amount} монет`);
         
-        // Очищаем форму
         document.getElementById('transfer-to').value = '';
         document.getElementById('transfer-amount').value = '';
         document.getElementById('transfer-comment').value = '';
         
-        // Обновляем баланс
         await loadBalance();
     } catch (error) {
         tg.showAlert('❌ Ошибка перевода');
     }
 }
+
 // ============================================
 // ИНИЦИАЛИЗАЦИЯ
 // ============================================
@@ -354,14 +333,10 @@ window.addEventListener('load', async () => {
             loadBalance(),
             loadStats(),
             loadTop(),
-            loadCatalog(),
-            loadAchievements()
+            loadGames(),
+            loadCatalog()
         ]);
     }
     
     console.log('✅ Все данные загружены');
-});
-
-window.addEventListener('error', (e) => {
-    console.error('Глобальная ошибка:', e.error);
 });
