@@ -853,3 +853,53 @@ body {
     gap: 10px;
     margin-top: 20px;
     }
+/* Красивые поля ввода */
+input[type="number"],
+input[type="text"] {
+    width: 100%;
+    padding: 15px;
+    border: 2px solid var(--border-color, #3a3a5c);
+    border-radius: 12px;
+    background: var(--bg-secondary, #1a1a2e);
+    color: var(--text-primary, #ffffff);
+    font-size: 16px;
+    font-weight: bold;
+    outline: none;
+    transition: all 0.3s;
+    box-sizing: border-box;
+}
+
+input[type="number"]:focus,
+input[type="text"]:focus {
+    border-color: var(--primary-color, #667eea);
+    box-shadow: 0 0 15px rgba(102, 126, 234, 0.3);
+}
+
+input[type="number"]::placeholder,
+input[type="text"]::placeholder {
+    color: #6c757d;
+    font-weight: normal;
+}
+
+/* Поля в играх */
+.game-controls input[type="number"] {
+    margin-bottom: 15px;
+}
+
+/* Кнопки в играх */
+.game-controls .action-btn {
+    width: 100%;
+    padding: 15px;
+    font-size: 18px;
+    font-weight: bold;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    border-radius: 12px;
+    color: white;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.game-controls .action-btn:active {
+    transform: scale(0.98);
+}
