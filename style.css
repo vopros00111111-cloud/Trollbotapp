@@ -650,3 +650,206 @@ body {
     background: rgba(231, 76, 60, 0.2);
     color: #e74c3c;
 }
+/* Игровые секции */
+.game-section {
+    display: none;
+    padding: 20px;
+    animation: slideIn 0.3s;
+}
+
+.game-section.active {
+    display: block;
+}
+
+@keyframes slideIn {
+    from { transform: translateX(100%); }
+    to { transform: translateX(0); }
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(1440deg); }
+}
+
+.game-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.back-btn {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    border: none;
+    padding: 10px 20px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+/* Блэкджек */
+.blackjack-table {
+    background: linear-gradient(135deg, #1e5128 0%, #0f3460 100%);
+    border-radius: 20px;
+    padding: 30px;
+    margin-bottom: 20px;
+    min-height: 300px;
+}
+
+.dealer-area, .player-area {
+    text-align: center;
+    margin: 20px 0;}
+
+.cards {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin: 15px 0;
+    min-height: 80px;
+}
+
+.card {
+    background: white;
+    color: black;
+    padding: 15px 20px;
+    border-radius: 10px;
+    font-size: 24px;
+    font-weight: bold;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+    min-width: 60px;
+    text-align: center;
+}
+
+.card.red {
+    color: #e74c3c;
+}
+
+.card.black {
+    color: #2c3e50;
+}
+
+.card.hidden {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.score {
+    font-size: 20px;
+    font-weight: bold;
+    color: white;
+    margin: 10px 0;
+}
+
+/* Слоты */
+.slots-machine {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 20px;
+    padding: 40px;
+    margin-bottom: 20px;
+}
+.reels {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+.reel {
+    background: white;
+    width: 80px;
+    height: 80px;
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 40px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+}
+
+/* Рулетка */
+.roulette-wheel {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    border-radius: 50%;
+    width: 200px;
+    height: 200px;
+    margin: 0 auto 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+}
+
+.wheel-result {
+    font-size: 60px;
+    font-weight: bold;
+    color: white;
+}
+
+.roulette-options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.bet-option {
+    padding: 15px;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: bold;    cursor: pointer;
+    color: white;
+}
+
+.bet-option.red { background: #e74c3c; }
+.bet-option.black { background: #2c3e50; }
+.bet-option.green { background: #27ae60; }
+
+/* Сообщения */
+.game-message {
+    text-align: center;
+    padding: 20px;
+    margin-top: 20px;
+    border-radius: 10px;
+    font-size: 18px;
+    font-weight: bold;
+    min-height: 60px;
+}
+
+.game-message.win {
+    background: rgba(39, 174, 96, 0.2);
+    color: #27ae60;
+}
+
+.game-message.lose {
+    background: rgba(231, 76, 60, 0.2);
+    color: #e74c3c;
+}
+
+.game-message.draw {
+    background: rgba(241, 196, 15, 0.2);
+    color: #f1c40f;
+}
+
+/* Кнопки игр */
+.game-btn {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    margin: 5px;
+}
+
+.game-btn:active {
+    transform: scale(0.98);
+}
+.play-controls {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+    }
