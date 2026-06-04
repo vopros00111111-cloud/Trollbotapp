@@ -167,10 +167,7 @@ function renderGames(games) {
         
         let buttons = '';
         if (game.id === 'poker' || game.id === 'durak') {
-            buttons = `
-                <button class="game-action-btn" onclick="createTable('${game.id}')">Создать стол</button>
-                <button class="game-secondary-btn">Быстрая игра</button>
-            `;
+            buttons = `<button class="game-action-btn" onclick="createTable('${game.id}')">Создать стол</button>`;
         } else {
             buttons = `<button class="game-action-btn">Играть</button>`;
         }
