@@ -13,10 +13,10 @@
     <header class="app-header">
         <div class="header-top">
             <div class="user-info">
-                <img src="https://via.placeholder.com/50" alt="Avatar" class="user-avatar" id="header-avatar">
+                <img src="" alt="Avatar" class="user-avatar" id="header-avatar">
                 <div class="user-details">
                     <div class="user-nickname" id="header-nickname">Загрузка...</div>
-                    <div class="user-status">Онлайн</div>
+                    <div class="user-status" id="header-status">Онлайн</div>
                 </div>
             </div>
             <div class="balance-display">
@@ -36,18 +36,10 @@
                 <div class="top-container">
                     <h3>Топ:</h3>
                     <div class="top-list" id="top-list">
-                        <div class="top-item"><span class="top-place">1</span><span class="top-name">@player1</span><span class="top-score">10000</span></div>
-                        <div class="top-item"><span class="top-place">2</span><span class="top-name">@player2</span><span class="top-score">8500</span></div>
-                        <div class="top-item"><span class="top-place">3</span><span class="top-name">@player3</span><span class="top-score">7200</span></div>
-                        <div class="top-item"><span class="top-place">4</span><span class="top-name">@player4</span><span class="top-score">6100</span></div>
-                        <div class="top-item"><span class="top-place">5</span><span class="top-name">@player5</span><span class="top-score">5000</span></div>
-                        <div class="top-item"><span class="top-place">6</span><span class="top-name">@player6</span><span class="top-score">4200</span></div>
-                        <div class="top-item"><span class="top-place">7</span><span class="top-name">@player7</span><span class="top-score">3500</span></div>
-                        <div class="top-item"><span class="top-place">8</span><span class="top-name">@player8</span><span class="top-score">2800</span></div>
-                        <div class="top-item"><span class="top-place">9</span><span class="top-name">@player9</span><span class="top-score">2100</span></div>
-                        <div class="top-item"><span class="top-place">10</span><span class="top-name">@player10</span><span class="top-score">1500</span></div>
+                        <!-- Сюда JavaScript вставит Топ-10 из бота -->
                     </div>
-                </div>                <div class="main-buttons">
+                </div>
+                <div class="main-buttons">
                     <button class="main-btn" onclick="switchTab('games')">🎮 Игры</button>
                     <button class="main-btn" onclick="switchTab('transfer')">💸 Переводы</button>
                     <button class="main-btn" onclick="switchTab('profile')">👤 Профиль</button>
@@ -55,13 +47,12 @@
                 </div>
             </div>
         </section>
-
-        <!-- ИГРЫ -->
         <!-- ИГРЫ -->
         <section id="tab-games" class="tab-content">
             <h2 class="section-title">Игры:</h2>
             <div class="games-grid" id="games-list">
-        <!-- Игры будут загружаться из бота -->
+                <!-- Игры будут загружаться из бота -->
+                <!-- Временные заглушки для основных игр -->
                 <div class="game-card">
                     <div class="game-icon">🃏</div>
                     <h3>Покер</h3>
@@ -76,27 +67,14 @@
                     <button class="game-action-btn" onclick="createDurakTable()">Создать стол</button>
                     <button class="game-secondary-btn">Играть с ботом</button>
                 </div>
-                <div class="game-card">
-                    <div class="game-icon">🎰</div>
-                    <h3>Слоты</h3>
-                    <p>Игровой автомат</p>
-                    <button class="game-action-btn">Играть</button>
-                </div>
-                <div class="game-card">
-                    <div class="game-icon">🎯</div>
-                    <h3>Рулетка</h3>
-                    <p>Красное/Чёрное</p>
-                    <button class="game-action-btn">Играть</button>
-                </div>
             </div>
         </section>
 
         <!-- КАТАЛОГ -->
-        <!-- КАТАЛОГ -->
         <section id="tab-catalog" class="tab-content">
             <h2 class="section-title">Каталог:</h2>
             <div class="catalog-grid" id="catalog-list">
-        <!-- Товары будут загружаться из бота -->
+                <!-- Товары будут загружаться из бота -->
             </div>
         </section>
 
@@ -119,33 +97,31 @@
                 <button class="action-btn" onclick="sendTransfer()">Отправить перевод</button>
             </div>
         </section>
-
-        <!-- ПРОФИЛЬ -->        <section id="tab-profile" class="tab-content">
+        <!-- ПРОФИЛЬ -->
+        <section id="tab-profile" class="tab-content">
             <div class="profile-header">
-                <img src="https://via.placeholder.com/100" alt="Avatar" class="profile-avatar" id="profile-avatar">
+                <img src="" alt="Avatar" class="profile-avatar" id="profile-avatar">
                 <h2 class="profile-nickname" id="profile-nickname">Загрузка...</h2>
                 <div class="profile-balance" id="profile-balance">0 💰</div>
             </div>
             <div class="profile-stats">
                 <div class="stat-card">
-                    <div class="stat-value" id="stat-wins">0</div>
+                    <div class="stat-value" id="stat-wins">-</div>
                     <div class="stat-label">Побед</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-value" id="stat-losses">0</div>
+                    <div class="stat-value" id="stat-losses">-</div>
                     <div class="stat-label">Поражений</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-value" id="stat-games">0</div>
+                    <div class="stat-value" id="stat-games">-</div>
                     <div class="stat-label">Игр сыграно</div>
                 </div>
             </div>
             <div class="profile-section">
                 <h3>Достижения:</h3>
-                <div class="achievements-list">
-                    <div class="achievement">🏆 Первый выигрыш</div>
-                    <div class="achievement">💰 Богач (10000 монет)</div>
-                    <div class="achievement">🎰 Азартный (100 игр)</div>
+                <div class="achievements-list" id="achievements-list">
+                    <!-- Достижения будут загружаться из бота -->
                 </div>
             </div>
             <button class="action-btn" style="margin-top: 20px;">Настройки</button>
@@ -169,8 +145,7 @@
             <div class="form-group">
                 <label>Количество игроков:</label>
                 <select id="table-players">
-                    <option value="2">2 игрока</option>
-                    <option value="3">3 игрока</option>
+                    <option value="2">2 игрока</option>                    <option value="3">3 игрока</option>
                     <option value="4">4 игрока</option>
                     <option value="6">6 игроков</option>
                 </select>
