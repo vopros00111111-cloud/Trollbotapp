@@ -858,20 +858,21 @@ input[type="number"],
 input[type="text"] {
     width: 100%;
     padding: 15px;
-    border: 2px solid var(--border-color, #3a3a5c);
+    border: 2px solid #3a3a5c;
     border-radius: 12px;
-    background: var(--bg-secondary, #1a1a2e);
-    color: var(--text-primary, #ffffff);
+    background: #1a1a2e;
+    color: #ffffff;
     font-size: 16px;
     font-weight: bold;
     outline: none;
     transition: all 0.3s;
     box-sizing: border-box;
+    margin-bottom: 10px;
 }
 
 input[type="number"]:focus,
 input[type="text"]:focus {
-    border-color: var(--primary-color, #667eea);
+    border-color: #667eea;
     box-shadow: 0 0 15px rgba(102, 126, 234, 0.3);
 }
 
@@ -881,12 +882,143 @@ input[type="text"]::placeholder {
     font-weight: normal;
 }
 
-/* Поля в играх */
-.game-controls input[type="number"] {
-    margin-bottom: 15px;
+/* Рулетка */
+.roulette-container {
+    display: flex;
+    justify-content: center;
+    margin: 30px 0;
 }
 
-/* Кнопки в играх */
+.roulette-wheel {
+    width: 280px;
+    height: 280px;
+    border-radius: 50%;
+    background: conic-gradient(
+        #27ae60 0deg 9.73deg,      /* 0 - зелёный */
+        #e74c3c 9.73deg 19.46deg,  /* 32 - красный */
+        #2c3e50 19.46deg 29.19deg, /* 15 - чёрный */
+        #e74c3c 29.19deg 38.92deg, /* 19 - красный */
+        #2c3e50 38.92deg 48.65deg, /* 4 - чёрный */
+        #e74c3c 48.65deg 58.38deg, /* 21 - красный */
+        #2c3e50 58.38deg 68.11deg, /* 2 - чёрный */
+        #e74c3c 68.11deg 77.84deg, /* 25 - красный */
+        #2c3e50 77.84deg 87.57deg, /* 17 - чёрный */        #e74c3c 87.57deg 97.30deg, /* 34 - красный */
+        #2c3e50 97.30deg 107.03deg,/* 6 - чёрный */
+        #e74c3c 107.03deg 116.76deg,/* 27 - красный */
+        #2c3e50 116.76deg 126.49deg,/* 13 - чёрный */
+        #e74c3c 126.49deg 136.22deg,/* 36 - красный */
+        #2c3e50 136.22deg 145.95deg,/* 11 - чёрный */
+        #e74c3c 145.95deg 155.68deg,/* 30 - красный */
+        #2c3e50 155.68deg 165.41deg,/* 8 - чёрный */
+        #e74c3c 165.41deg 175.14deg,/* 23 - красный */
+        #2c3e50 175.14deg 184.86deg,/* 10 - чёрный */
+        #e74c3c 184.86deg 194.59deg,/* 5 - красный */
+        #2c3e50 194.59deg 204.32deg,/* 24 - чёрный */
+        #e74c3c 204.32deg 214.05deg,/* 16 - красный */
+        #2c3e50 214.05deg 223.78deg,/* 33 - чёрный */
+        #e74c3c 223.78deg 233.51deg,/* 1 - красный */
+        #2c3e50 233.51deg 243.24deg,/* 20 - чёрный */
+        #e74c3c 243.24deg 252.97deg,/* 14 - красный */
+        #2c3e50 252.97deg 262.70deg,/* 31 - чёрный */
+        #e74c3c 262.70deg 272.43deg,/* 9 - красный */
+        #2c3e50 272.43deg 282.16deg,/* 22 - чёрный */
+        #e74c3c 282.16deg 291.89deg,/* 18 - красный */
+        #2c3e50 291.89deg 301.62deg,/* 29 - чёрный */
+        #e74c3c 301.62deg 311.35deg,/* 7 - красный */
+        #2c3e50 311.35deg 321.08deg,/* 28 - чёрный */
+        #e74c3c 321.08deg 330.81deg,/* 12 - красный */
+        #2c3e50 330.81deg 340.54deg,/* 35 - чёрный */
+        #e74c3c 340.54deg 350.27deg,/* 3 - красный */
+        #2c3e50 350.27deg 360deg    /* 26 - чёрный */
+    );
+    position: relative;
+    box-shadow: 0 0 0 8px #fff, 0 0 0 12px #333, 0 8px 32px rgba(0,0,0,0.5);
+    transition: transform 3s cubic-bezier(0.17, 0.67, 0.12, 0.99);
+}
+
+.roulette-wheel.spinning {
+    animation: spin 3s cubic-bezier(0.17, 0.67, 0.12, 0.99);
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(1440deg); }
+}
+
+.wheel-center {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 140px;
+    height: 140px;    background: radial-gradient(circle, #27ae60 0%, #1e8449 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.3), 0 0 10px rgba(0,0,0,0.5);
+    border: 4px solid #fff;
+}
+
+.wheel-number {
+    font-size: 48px;
+    font-weight: bold;
+    color: white;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+}
+
+.roulette-bet-types {
+    margin-top: 20px;
+}
+
+.roulette-bet-types h3 {
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.bet-options-colors {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.bet-number-section {
+    border-top: 2px solid #3a3a5c;
+    padding-top: 20px;
+}
+
+.bet-number-section label {
+    display: block;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.number-bet {
+    background: #f39c12 !important;
+    width: 100%;
+    margin-top: 10px;
+}
+
+.bet-option {    padding: 15px;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    color: white;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.bet-option:active {
+    transform: scale(0.98);
+}
+
+.bet-option.red { background: #e74c3c; }
+.bet-option.black { background: #2c3e50; }
+.bet-option.green { background: #27ae60; }
+
+/* Кнопки игр */
 .game-controls .action-btn {
     width: 100%;
     padding: 15px;
@@ -898,8 +1030,40 @@ input[type="text"]::placeholder {
     color: white;
     cursor: pointer;
     transition: transform 0.2s;
+    margin-top: 10px;
 }
 
 .game-controls .action-btn:active {
     transform: scale(0.98);
 }
+
+/* Сообщения */
+.game-message {
+    text-align: center;
+    padding: 20px;
+    margin-top: 20px;
+    border-radius: 12px;
+    font-size: 18px;
+    font-weight: bold;
+    min-height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.game-message.win {
+    background: rgba(39, 174, 96, 0.2);
+    color: #27ae60;
+    border: 2px solid #27ae60;
+}
+
+.game-message.lose {
+    background: rgba(231, 76, 60, 0.2);
+    color: #e74c3c;
+    border: 2px solid #e74c3c;
+}
+
+.game-message.draw {
+    background: rgba(241, 196, 15, 0.2);
+    color: #f1c40f;
+    border: 2px solid #f1c40f;
+        }
