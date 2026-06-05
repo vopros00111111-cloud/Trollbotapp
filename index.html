@@ -203,6 +203,40 @@
     
             <div class="game-message" id="roulette-message"></div>
         </section>
+        <!-- ПОКЕР -->
+        <section id="game-poker" class="game-section">
+            <div class="game-header">
+                <button class="back-btn" onclick="closeGame('poker')">← Назад</button>
+                <h2>🃏 Покер</h2>
+            </div>
+    
+            <div id="poker-lobby">
+                <div class="form-group">
+                    <label>Ставка:</label>
+                    <input type="number" id="poker-bet" placeholder="Минимум 100" min="100">
+                </div>
+                <div class="form-group">
+                    <label>Игроков (2-4):</label>
+                    <select id="poker-players">
+                        <option value="2">2 игрока</option>
+                        <option value="3">3 игрока</option>
+                        <option value="4">4 игрока</option>
+                    </select>
+                </div>
+                <button class="action-btn" onclick="createPokerTable()">Создать стол</button>
+            </div>
+    
+            <div id="poker-game" style="display:none;">
+                <div class="poker-table">
+                    <div class="community-cards" id="community-cards"></div>
+                    <div class="pot-info">Банк: <span id="poker-pot">0</span></div>
+                    <div class="player-hand" id="player-hand"></div>
+                </div>
+                <div class="poker-controls" id="poker-controls"></div>
+            </div>
+    
+            <div class="game-message" id="poker-message"></div>
+        </section>
 
     </main>
 
