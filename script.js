@@ -148,7 +148,7 @@ function renderTop(topList) {
     }
     
     topList.forEach((player, index) => {
-        const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '' : `${index + 1}.`;
+        const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}.`;
         const item = document.createElement('div');
         item.className = 'top-item';
         item.innerHTML = `
