@@ -157,10 +157,9 @@ function renderGames(games) {
     const container = document.getElementById('games-list');
     container.innerHTML = '';
     
-    if (game.id === 'poker') {
-    buttons = `<button class="game-action-btn" onclick="openGame('poker')">Создать стол</button>`;
-} else if (game.id === 'durak') {
-    buttons = `<button class="game-action-btn" onclick="createTable('durak')">Создать стол</button>`;
+    if (!games || games.length === 0) {
+        container.innerHTML = '<div style="text-align:center; padding:20px; color:#888;">Нет доступных игр</div>';
+        return;
     }
     
     games.forEach(game => {
@@ -168,8 +167,11 @@ function renderGames(games) {
         card.className = 'game-card';
         
         let buttons = '';
-        if (game.id === 'poker' || game.id === 'durak') {
-            buttons = `<button class="game-action-btn" onclick="createTable('${game.id}')">Создать стол</button>`;
+        if (game.id === 'poker') {
+            buttons = `<button class="game-action-btn" onclick="openGame('poker')">Создать стол</button>`;
+        } else if (game.id === 'durak') {
+            buttons = `<button class="game-action-btn" onclick="createTable('durak')">Создать стол</button>`;
+        }
         } else if (game.id === 'blackjack' || game.id === 'slots' || game.id === 'roulette') {
             buttons = `<button class="game-action-btn" onclick="openGame('${game.id}')">Играть</button>`;
         } else {
