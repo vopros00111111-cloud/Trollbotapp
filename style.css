@@ -1067,3 +1067,7 @@ input[type="text"]::placeholder {
     color: #f1c40f;
     border: 2px solid #f1c40f;
         }
+/* Скрытие нижнего меню */
+.bottom-nav.hidden {
+    display: none;
+}
