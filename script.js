@@ -711,24 +711,20 @@ async function createPokerTable() {
         return;
     }
     
-    try {
-        const response = await apiRequest('/poker/create', 'POST', {
-            user_id: currentUser.id,
-            bet: bet,
-            max_players: maxPlayers
-        });
-        
-        if (response.success) {
-            document.getElementById('poker-lobby').style.display = 'none';
-            document.getElementById('poker-game').style.display = 'block';
-            document.getElementById('poker-message').innerText = '✅ Стол создан! Ожидание игроков...';
-            loadBalance();
-        }
-    } catch (error) {
-        tg.showAlert('❌ Ошибка создания стола');
-    }
+    // Отправляем данные боту
+    tg.sendData(JSON.stringify({
+        action: 'create_poker_table',
+        bet: bet,
+        max_players: maxPlayers
+    }));
+    
+    // Показываем успех
+    tg.showAlert(`✅ Стол создан!\n\n💰 Ставка: ${bet}\n👥 Игроков: ${maxPlayers}\n\nПриглашение отправлено в чат!`);
+    
+    // Возвращаемся на главную
+    closeGame('poker');
+    await loadBalance();
 }
-
 async function joinPokerTable(tableId) {
     try {
         const response = await apiRequest('/poker/join', 'POST', {
