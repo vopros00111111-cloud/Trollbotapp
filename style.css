@@ -1071,3 +1071,46 @@ input[type="text"]::placeholder {
 .bottom-nav.hidden {
     display: none;
 }
+/* Покер */
+.poker-table {
+    background: linear-gradient(135deg, #1e5128 0%, #0f3460 100%);
+    border-radius: 20px;
+    padding: 30px;
+    margin: 20px 0;
+    min-height: 300px;
+    text-align: center;
+}
+
+.community-cards {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin: 20px 0;
+    min-height: 80px;
+}
+
+.pot-info {
+    font-size: 24px;
+    font-weight: bold;
+    color: #f1c40f;
+    margin: 20px 0;
+}
+
+.player-hand {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin: 20px 0;
+}
+
+.poker-controls {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.poker-controls button {
+    flex: 1;
+    max-width: 150px;
+}
