@@ -715,7 +715,9 @@ async function createPokerTable() {
         const response = await apiRequest('/poker/create', 'POST', {
             user_id: currentUser.id,
             bet: bet,
-            max_players: maxPlayers
+            max_players: maxPlayers,
+            // 🔹 Добавляем chat_id из initData
+            chat_id: tg.initDataUnsafe.chat?.id || 0
         });
         
         if (response.success) {
