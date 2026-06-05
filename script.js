@@ -696,3 +696,52 @@ window.addEventListener('load', async () => {
     
     console.log('✅ Все данные загружены');
 });
+// ПОКЕР
+async function createPokerTable() {
+    const bet = parseInt(document.getElementById('poker-bet').value);
+    const maxPlayers = parseInt(document.getElementById('poker-players').value);
+    
+    if (!bet || bet < 100) {
+        tg.showAlert('❌ Минимальная ставка: 100 монет');
+        return;
+    }
+    
+    if (bet > currentBalance) {
+        tg.showAlert('❌ Недостаточно монет!');
+        return;
+    }
+    
+    try {
+        const response = await apiRequest('/poker/create', 'POST', {
+            user_id: currentUser.id,
+            bet: bet,
+            max_players: maxPlayers
+        });
+        
+        if (response.success) {
+            document.getElementById('poker-lobby').style.display = 'none';
+            document.getElementById('poker-game').style.display = 'block';
+            document.getElementById('poker-message').innerText = '✅ Стол создан! Ожидание игроков...';
+            loadBalance();
+        }
+    } catch (error) {
+        tg.showAlert('❌ Ошибка создания стола');
+    }
+}
+
+async function joinPokerTable(tableId) {
+    try {
+        const response = await apiRequest('/poker/join', 'POST', {
+            user_id: currentUser.id,
+            table_id: tableId
+        });
+        
+        if (response.success) {
+            document.getElementById('poker-lobby').style.display = 'none';
+            document.getElementById('poker-game').style.display = 'block';
+            loadBalance();
+        }
+    } catch (error) {
+        tg.showAlert('❌ Ошибка присоединения');
+    }
+}
