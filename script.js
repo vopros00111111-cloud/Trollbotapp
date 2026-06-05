@@ -712,7 +712,7 @@ async function createPokerTable() {
     }
     
     try {
-        const response = await apiRequest('/poker/create', 'POST', {
+        const response = await apiRequest('/api/poker/create', 'POST', {
             user_id: currentUser.id,
             bet: bet,
             max_players: maxPlayers,
