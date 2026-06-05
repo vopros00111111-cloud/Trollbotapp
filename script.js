@@ -157,9 +157,10 @@ function renderGames(games) {
     const container = document.getElementById('games-list');
     container.innerHTML = '';
     
-    if (!games || games.length === 0) {
-        container.innerHTML = '<div style="text-align:center; padding:20px; color:#888;">Нет доступных игр</div>';
-        return;
+    if (game.id === 'poker') {
+    buttons = `<button class="game-action-btn" onclick="openGame('poker')">Создать стол</button>`;
+} else if (game.id === 'durak') {
+    buttons = `<button class="game-action-btn" onclick="createTable('durak')">Создать стол</button>`;
     }
     
     games.forEach(game => {
