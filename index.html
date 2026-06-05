@@ -274,5 +274,14 @@
     </div>
 
     <script src="script.js"></script>
+    <!-- Консоль для мобильных -->
+    <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+    <script>
+    // Добавляем кнопку эрлады только для отладки
+        if (window.location.hostname.includes('github.io')) {
+            eruda.init();
+            eruda.show();
+        }
+</script>
 </body>
 </html>
