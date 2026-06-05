@@ -49,6 +49,9 @@ function initUser() {
 // ============================================
 // API ЗАПРОСЫ// ============================================
 async function apiRequest(endpoint, method = 'GET', data = null) {
+    const url = `${API_URL}${endpoint}`;
+    console.log(`📡 API Request: ${method} ${url}`, data);
+    
     try {
         const options = {
             method: method,
@@ -59,7 +62,8 @@ async function apiRequest(endpoint, method = 'GET', data = null) {
             options.body = JSON.stringify(data);
         }
         
-        const response = await fetch(`${API_URL}${endpoint}`, options);
+        const response = await fetch(url, options);
+        console.log(`📥 API Response: ${response.status}`, await response.clone().text());
         
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
@@ -67,21 +71,24 @@ async function apiRequest(endpoint, method = 'GET', data = null) {
         
         return await response.json();
     } catch (error) {
-        console.error(`API Error (${endpoint}):`, error);
+        console.error(`❌ API Error (${endpoint}):`, error);
+        console.error('URL:', url);
+        console.error('API_URL:', API_URL);
         throw error;
     }
 }
-
 // Загрузка баланса
 async function loadBalance() {
     try {
+        console.log('💰 Loading balance for user:', currentUser?.id);
         const data = await apiRequest(`/balance/${currentUser.id}`);
         currentBalance = data.balance;
         
+        console.log('✅ Balance loaded:', currentBalance);
         document.getElementById('header-balance').innerText = `${currentBalance} 💰`;
         document.getElementById('profile-balance').innerText = `${currentBalance} `;
     } catch (error) {
-        console.error('Ошибка загрузки баланса:', error);
+        console.error('❌ Ошибка загрузки баланса:', error);
         document.getElementById('header-balance').innerText = 'Ошибка 💰';
     }
 }
