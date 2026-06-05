@@ -326,15 +326,18 @@ async function sendTransfer() {
 // ============================================
 
 // Открыть игру
+// Открыть игру (скрывает нижнее меню)
 function openGame(gameName) {
     document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
     document.getElementById(`game-${gameName}`).classList.add('active');
+    document.querySelector('.bottom-nav').classList.add('hidden');
 }
 
-// Закрыть игру
+// Закрыть игру (показывает нижнее меню)
 function closeGame(gameName) {
     document.getElementById(`game-${gameName}`).classList.remove('active');
     document.getElementById('tab-games').classList.add('active');
+    document.querySelector('.bottom-nav').classList.remove('hidden');
 }
 
 // ============================================
