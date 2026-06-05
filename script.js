@@ -712,7 +712,6 @@ async function createPokerTable() {
     }
     
     try {
-        // 🔹 ОТПРАВЛЯЕМ ЧЕРЕЗ API (не tg.sendData!)
         const response = await apiRequest('/poker/create', 'POST', {
             user_id: currentUser.id,
             bet: bet,
@@ -725,7 +724,7 @@ async function createPokerTable() {
             await loadBalance();
         }
     } catch (error) {
-        console.error('Ошибка создания стола:', error);
+        console.error('Ошибка:', error);
         tg.showAlert('❌ Ошибка создания стола');
     }
 }
