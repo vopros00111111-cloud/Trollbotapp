@@ -49,9 +49,6 @@ function initUser() {
 // ============================================
 // API ЗАПРОСЫ// ============================================
 async function apiRequest(endpoint, method = 'GET', data = null) {
-    const url = `${API_URL}${endpoint}`;
-    console.log(`📡 API Request: ${method} ${url}`, data);
-    
     try {
         const options = {
             method: method,
@@ -62,8 +59,7 @@ async function apiRequest(endpoint, method = 'GET', data = null) {
             options.body = JSON.stringify(data);
         }
         
-        const response = await fetch(url, options);
-        console.log(`📥 API Response: ${response.status}`, await response.clone().text());
+        const response = await fetch(`${API_URL}${endpoint}`, options);
         
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
@@ -71,24 +67,21 @@ async function apiRequest(endpoint, method = 'GET', data = null) {
         
         return await response.json();
     } catch (error) {
-        console.error(`❌ API Error (${endpoint}):`, error);
-        console.error('URL:', url);
-        console.error('API_URL:', API_URL);
+        console.error(`API Error (${endpoint}):`, error);
         throw error;
     }
 }
+
 // Загрузка баланса
 async function loadBalance() {
     try {
-        console.log('💰 Loading balance for user:', currentUser?.id);
         const data = await apiRequest(`/balance/${currentUser.id}`);
         currentBalance = data.balance;
         
-        console.log('✅ Balance loaded:', currentBalance);
         document.getElementById('header-balance').innerText = `${currentBalance} 💰`;
-        document.getElementById('profile-balance').innerText = `${currentBalance} `;
+        document.getElementById('profile-balance').innerText = `${currentBalance} 💰`;
     } catch (error) {
-        console.error('❌ Ошибка загрузки баланса:', error);
+        console.error('Ошибка загрузки баланса:', error);
         document.getElementById('header-balance').innerText = 'Ошибка 💰';
     }
 }
@@ -152,8 +145,7 @@ function renderTop(topList) {
         const item = document.createElement('div');
         item.className = 'top-item';
         item.innerHTML = `
-            <span class="top-place">${medal}</span>
-            <span class="top-name">@${player.username}</span>
+            <span class="top-place">${medal}</span>            <span class="top-name">@${player.username}</span>
             <span class="top-score">${player.balance.toLocaleString()}</span>
         `;
         container.appendChild(item);
@@ -178,7 +170,6 @@ function renderGames(games) {
             buttons = `<button class="game-action-btn" onclick="openGame('poker')">Создать стол</button>`;
         } else if (game.id === 'durak') {
             buttons = `<button class="game-action-btn" onclick="createTable('durak')">Создать стол</button>`;
-        }
         } else if (game.id === 'blackjack' || game.id === 'slots' || game.id === 'roulette') {
             buttons = `<button class="game-action-btn" onclick="openGame('${game.id}')">Играть</button>`;
         } else {
@@ -203,16 +194,15 @@ function renderCatalog(items) {
         container.innerHTML = '<div style="text-align:center; padding:20px; color:#888;">Каталог пуст</div>';
         return;
     }
-    
-    items.forEach(item => {
+        items.forEach(item => {
         const card = document.createElement('div');
         card.className = 'catalog-item';
         card.innerHTML = `
-            <div class="catalog-icon">📦</div>
+            <div class="catalog-icon"></div>
             <div class="catalog-info">
                 <h4>${item.name}</h4>
                 <p>${item.description}</p>
-                <div class="catalog-price">${item.price.toLocaleString()} </div>
+                <div class="catalog-price">${item.price.toLocaleString()} 💰</div>
             </div>
         `;
         container.appendChild(card);
@@ -253,8 +243,8 @@ function switchTab(tabName) {
 // ============================================
 function createTable(gameType) {
     currentGameType = gameType;
-    document.getElementById('modal-create-table').classList.add('active');
-}
+    document.getElementById('modal-create-table').classList.add('active');}
+
 function closeModal() {
     document.getElementById('modal-create-table').classList.remove('active');
 }
@@ -264,12 +254,12 @@ async function confirmCreateTable() {
     const bet = parseInt(document.getElementById('table-bet').value);
     
     if (!bet || bet < 100) {
-        tg.showAlert('❌ Минимальная ставка: 100 монет');
+        tg.showAlert(' Минимальная ставка: 100 монет');
         return;
     }
     
     if (bet > currentBalance) {
-        tg.showAlert(' Недостаточно монет!');
+        tg.showAlert('❌ Недостаточно монет!');
         return;
     }
     
@@ -285,7 +275,7 @@ async function confirmCreateTable() {
     closeModal();
     
     const gameName = currentGameType === 'poker' ? 'Покер' : 'Дурак';
-    tg.showAlert(`✅ Стол создан!\n\n🎮 Игра: ${gameName}\n👥 Игроков: ${players}\n💰 Ставка: ${bet} монет\n\nПриглашение отправлено в чат!`);
+    tg.showAlert(`✅ Стол создан!\n\n Игра: ${gameName}\n👥 Игроков: ${players}\n💰 Ставка: ${bet} монет\n\nПриглашение отправлено в чат!`);
 }
 
 // ============================================
@@ -297,14 +287,14 @@ async function sendTransfer() {
     const comment = document.getElementById('transfer-comment').value.trim();
     
     if (!to) {
-        tg.showAlert(' Введите получателя (@username)');
+        tg.showAlert('❌ Введите получателя (@username)');
         return;
     }
     
     if (!amount || amount <= 0) {
-        tg.showAlert(' Введите корректную сумму');
-        return;
-    }    
+        tg.showAlert('❌ Введите корректную сумму');        return;
+    }
+    
     if (amount > currentBalance) {
         tg.showAlert('❌ Недостаточно монет!');
         return;
@@ -335,7 +325,6 @@ async function sendTransfer() {
 // ИГРЫ В WEB APP
 // ============================================
 
-// Открыть игру
 // Открыть игру (скрывает нижнее меню)
 function openGame(gameName) {
     document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
@@ -352,16 +341,16 @@ function closeGame(gameName) {
 
 // ============================================
 // БЛЭКДЖЕК
-// ============================================
-let bjGame = {
+// ============================================let bjGame = {
     deck: [],
     playerHand: [],
-    dealerHand: [],    bet: 0,
+    dealerHand: [],
+    bet: 0,
     gameOver: false
 };
 
 function createDeck() {
-    const suits = ['♠️', '♥️', '♦️', '♣️'];
+    const suits = ['♠️', '♥️', '♦️', '️'];
     const ranks = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
     const deck = [];
     
@@ -401,11 +390,11 @@ function updateBlackjackUI() {
     const playerScore = document.getElementById('player-score');
     const dealerScore = document.getElementById('dealer-score');
     
-    playerCards.innerHTML = bjGame.playerHand.map(c => renderCard(c)).join('');
-    dealerCards.innerHTML = bjGame.dealerHand.map((c, i) => 
+    playerCards.innerHTML = bjGame.playerHand.map(c => renderCard(c)).join('');    dealerCards.innerHTML = bjGame.dealerHand.map((c, i) => 
         renderCard(c, i === 1 && bjGame.dealerHand.length === 2 && !bjGame.gameOver)
     ).join('');
-        playerScore.innerText = calculateScore(bjGame.playerHand);
+    
+    playerScore.innerText = calculateScore(bjGame.playerHand);
     dealerScore.innerText = bjGame.dealerHand.length === 2 && !bjGame.gameOver ? '?' : calculateScore(bjGame.dealerHand);
 }
 
@@ -450,7 +439,6 @@ async function startBlackjack() {
         setTimeout(() => stand(), 500);
     }
 }
-
 async function hit() {
     if (bjGame.gameOver) return;
     
@@ -458,7 +446,8 @@ async function hit() {
     updateBlackjackUI();
     
     const score = calculateScore(bjGame.playerHand);
-        if (score > 21) {
+    
+    if (score > 21) {
         bjGame.gameOver = true;
         document.getElementById('play-controls').style.display = 'none';
         document.getElementById('bet-controls').style.display = 'block';
@@ -499,31 +488,31 @@ async function stand() {
                 amount: winAmount,
                 game: 'blackjack'
             });
-        } catch (error) {}
-        msgEl.innerText = `🎉 Вы выиграли ${winAmount} монет!`;
+        } catch (error) {}        msgEl.innerText = `🎉 Вы выиграли ${winAmount} монет!`;
         msgEl.className = 'game-message win';
     } else if (playerScore === dealerScore) {
         try {
             await apiRequest('/game-win', 'POST', {
                 user_id: currentUser.id,
                 amount: bjGame.bet,
-                game: 'blackjack_draw'            });
+                game: 'blackjack_draw'
+            });
         } catch (error) {}
         msgEl.innerText = ' Ничья! Ставка возвращена.';
         msgEl.className = 'game-message draw';
     } else {
-        msgEl.innerText = ' Дилер выиграл!';
+        msgEl.innerText = '😔 Дилер выиграл!';
         msgEl.className = 'game-message lose';
     }
     
     updateBlackjackUI();
     await loadBalance();
-        }
+}
 
 // ============================================
 // СЛОТЫ
 // ============================================
-const slotSymbols = ['🍒', '🍋', '🍊', '🍇', '💎', '7️⃣', '🔔'];
+const slotSymbols = ['🍒', '🍋', '🍊', '🍇', '💎', '7️', '🔔'];
 
 async function spinSlots() {
     const bet = parseInt(document.getElementById('slots-bet').value);
@@ -548,8 +537,7 @@ async function spinSlots() {
         tg.showAlert('❌ Ошибка списания ставки');
         return;
     }
-    
-    const reels = [document.getElementById('reel1'), document.getElementById('reel2'), document.getElementById('reel3')];
+        const reels = [document.getElementById('reel1'), document.getElementById('reel2'), document.getElementById('reel3')];
     const msgEl = document.getElementById('slots-message');
     msgEl.innerText = '';
     
@@ -572,7 +560,7 @@ async function spinSlots() {
     let message = '';
     
     if (result[0] === result[1] && result[1] === result[2]) {
-        if (result[0] === '7️') {
+        if (result[0] === '7️⃣') {
             winAmount = bet * 50;
             message = `🎉 ДЖЕКПОТ 777! +${winAmount} монет!`;
         } else {
@@ -598,9 +586,9 @@ async function spinSlots() {
             });
         } catch (error) {}
     }
-    
-    await loadBalance();
+        await loadBalance();
 }
+
 // ============================================
 // РУЛЕТКА
 // ============================================
@@ -661,7 +649,7 @@ async function placeRouletteBet(choice) {
     
     if (choice === 'number' && betNumber === number) {
         winAmount = bet * 36;
-        message = `🎯 Выпало ${number}! Вы выиграли ${winAmount} монет!`;
+        message = ` Выпало ${number}! Вы выиграли ${winAmount} монет!`;
     } else if (choice === color) {
         const multiplier = color === 'green' ? 14 : 2;
         winAmount = bet * multiplier;
@@ -687,26 +675,8 @@ async function placeRouletteBet(choice) {
 }
 
 // ============================================
-// ИНИЦИАЛИЗАЦИЯ
-// ============================================
-window.addEventListener('load', async () => {
-    console.log('🚀 Приложение загружено');
-    
-    initUser();
-    
-    if (currentUser) {
-        await Promise.all([
-            loadBalance(),
-            loadStats(),
-            loadTop(),
-            loadGames(),
-            loadCatalog()
-        ]);
-    }
-    
-    console.log('✅ Все данные загружены');
-});
 // ПОКЕР
+// ============================================
 async function createPokerTable() {
     const bet = parseInt(document.getElementById('poker-bet').value);
     const maxPlayers = parseInt(document.getElementById('poker-players').value);
@@ -722,12 +692,10 @@ async function createPokerTable() {
     }
     
     try {
-        const response = await apiRequest('/api/poker/create', 'POST', {
+        const response = await apiRequest('/poker/create', 'POST', {
             user_id: currentUser.id,
             bet: bet,
-            max_players: maxPlayers,
-            // 🔹 Добавляем chat_id из initData
-            chat_id: tg.initDataUnsafe.chat?.id || 0
+            max_players: maxPlayers
         });
         
         if (response.success) {
@@ -740,9 +708,10 @@ async function createPokerTable() {
         tg.showAlert('❌ Ошибка создания стола');
     }
 }
+
 async function joinPokerTable(tableId) {
     try {
-        const response = await apiRequest('/api/poker/join', 'POST', {
+        const response = await apiRequest('/poker/join', 'POST', {
             user_id: currentUser.id,
             table_id: tableId
         });
@@ -756,3 +725,24 @@ async function joinPokerTable(tableId) {
         tg.showAlert('❌ Ошибка присоединения');
     }
 }
+
+// ============================================
+// ИНИЦИАЛИЗАЦИЯ
+// ============================================
+window.addEventListener('load', async () => {
+    console.log(' Приложение загружено');
+    
+    initUser();
+    
+    if (currentUser) {
+        await Promise.all([
+            loadBalance(),
+            loadStats(),
+            loadTop(),
+            loadGames(),
+            loadCatalog()
+        ]);
+    }
+    
+    console.log('✅ Все данные загружены');
+});
