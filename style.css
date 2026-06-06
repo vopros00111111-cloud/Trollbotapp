@@ -678,3 +678,127 @@ body {
    РУЛЕТКА
    ============================================ */
 
+/* ============================================
+   РУЛЕТКА
+   ============================================ */
+
+/* Контейнер для отображения числа */
+.roulette-display {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 20px 0 30px;
+}
+
+/* Большой круг с числом */
+.roulette-number {
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%);
+    border: 4px solid #8b5cf6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 72px;
+    font-weight: 800;
+    color: #fbbf24;
+    box-shadow: 0 8px 30px rgba(124, 58, 237, 0.5);
+    transition: all 0.1s;
+}
+
+/* Анимация пульсации во время "вращения" */
+.roulette-number.spinning {
+    animation: pulse 0.1s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+/* Красное число */
+.roulette-number.red {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    border-color: #f87171;
+    box-shadow: 0 8px 30px rgba(239, 68, 68, 0.5);
+}
+/* Чёрное число */
+.roulette-number.black {
+    background: linear-gradient(135deg, #374151 0%, #1f2937 100%);
+    border-color: #6b7280;
+    box-shadow: 0 8px 30px rgba(55, 65, 81, 0.5);
+}
+
+/* Зелёное число (0) */
+.roulette-number.green {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    border-color: #34d399;
+    box-shadow: 0 8px 30px rgba(16, 185, 129, 0.5);
+}
+
+/* Ряд кнопок ставок */
+.bet-buttons-row {
+    display: flex;
+    gap: 10px;
+    margin: 15px 0;
+}
+
+/* Кнопки ставок на цвет */
+.bet-btn {
+    flex: 1;
+    padding: 16px 10px;
+    border: none;
+    border-radius: 14px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #ffffff;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+    line-height: 1.3;
+}
+
+.bet-btn:hover {
+    transform: translateY(-2px);
+}
+
+.bet-btn:active {
+    transform: translateY(0);
+}
+
+/* Красная кнопка */
+.bet-btn.red {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+}
+
+/* Чёрная кнопка */.bet-btn.black {
+    background: linear-gradient(135deg, #374151 0%, #1f2937 100%);
+}
+
+/* Зелёная кнопка */
+.bet-btn.green {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+/* Блок ставки на число */
+.number-bet {
+    margin-top: 15px;
+}
+
+.number-bet label {
+    display: block;
+    font-size: 14px;
+    color: #c4b5fd;
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+.number-bet input {
+    width: 100%;
+    margin-bottom: 10px;
+}
