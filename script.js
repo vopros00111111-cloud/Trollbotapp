@@ -315,7 +315,8 @@ async function spinSlots() {
             game: 'slots'
         });
     } catch (error) {
-        tg.showAlert('❌ Ошибка списания ставки');        return;
+        tg.showAlert('❌ Ошибка списания ставки');
+        return;
     }
     
     const reels = [document.getElementById('reel1'), document.getElementById('reel2'), document.getElementById('reel3')];
@@ -422,7 +423,8 @@ async function placeRouletteBet(choice) {
     const startTime = Date.now();
     
     const spinTimer = setInterval(() => {
-        const elapsed = Date.now() - startTime;        resultEl.innerText = Math.floor(Math.random() * 37);
+        const elapsed = Date.now() - startTime;
+        resultEl.innerText = Math.floor(Math.random() * 37);
         
         if (elapsed >= spinDuration) {
             clearInterval(spinTimer);
@@ -471,7 +473,7 @@ async function placeRouletteBet(choice) {
             
             await loadBalance();
         }
-    }, spinInterval);}
+    }
 // Загрузка каталога
 async function loadCatalog() {
     try {
