@@ -111,6 +111,44 @@
 
 <!-- РУЛЕТКА -->
         <!-- РУЛЕТКА -->
+        <!-- РУЛЕТКА -->
+        <section id="game-roulette" class="tab-content game-section">
+            <div class="game-header">
+                <button class="back-btn" onclick="closeGame('roulette')">← Назад</button>
+                <h2>🎡 Рулетка</h2>
+            </div>
+    
+            <div class="roulette-display">
+                <div class="roulette-number" id="roulette-result">?</div>
+            </div>
+    
+            <div class="game-controls">
+                <div class="form-group">
+                    <label>Ставка:</label>
+                    <input type="number" id="roulette-bet" placeholder="100" min="10">
+                </div>
+        
+                <div class="bet-buttons-row">
+                    <button class="bet-btn red" onclick="placeRouletteBet('red')">
+                        🔴 Красное (x2)
+                    </button>
+                    <button class="bet-btn black" onclick="placeRouletteBet('black')">
+                        ⚫ Чёрное (x2)
+                    </button>
+                    <button class="bet-btn green" onclick="placeRouletteBet('green')">
+                        🟢 Зелёное (x14)
+                    </button>
+                </div>
+        
+                <div class="form-group">
+                    <label>Или поставьте на число (0-36):</label>
+                    <input type="number" id="roulette-number" placeholder="0-36" min="0" max="36">
+                </div>
+                <button class="action-btn" onclick="placeRouletteBet('number')">Число (x36)</button>
+            </div>
+    
+            <div id="roulette-message" class="game-message"></div>
+        </section>
         
 <!-- ПОКЕР -->
         <section id="game-poker" class="tab-content game-section">
