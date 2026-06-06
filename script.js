@@ -374,6 +374,9 @@ async function spinSlots() {
 // ============================================
 // РУЛЕТКА
 // ============================================
+// ============================================
+// РУЛЕТКА
+// ============================================
 async function placeRouletteBet(choice) {
     const bet = parseInt(document.getElementById('roulette-bet').value);
     
@@ -411,13 +414,10 @@ async function placeRouletteBet(choice) {
     const msgEl = document.getElementById('roulette-message');
     
     msgEl.innerText = '';
-    msgEl.className = 'game-message';
+    resultEl.innerText = '?';
     
-    // Убираем старые цвета
-    resultEl.classList.remove('red', 'black', 'green');
     resultEl.classList.add('spinning');
     
-    // Быстрая смена чисел (2 секунды)
     const spinDuration = 2000;
     const spinInterval = 80;
     const startTime = Date.now();
@@ -429,21 +429,17 @@ async function placeRouletteBet(choice) {
         if (elapsed >= spinDuration) {
             clearInterval(spinTimer);
             
-            // Финальное число
             const number = Math.floor(Math.random() * 37);
             resultEl.innerText = number;
             resultEl.classList.remove('spinning');
             
-            // Определяем цвет
             let color;
             if (number === 0) color = 'green';
             else if ([1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36].includes(number)) color = 'red';
             else color = 'black';
             
-            // Добавляем цвет
             resultEl.classList.add(color);
             
-            // Проверяем выигрыш
             let winAmount = 0;
             let message = '';
             
@@ -473,7 +469,8 @@ async function placeRouletteBet(choice) {
             
             await loadBalance();
         }
-    }, spinInterval);}
+    }, spinInterval);
+}
 // Загрузка каталога
 async function loadCatalog() {
     try {
