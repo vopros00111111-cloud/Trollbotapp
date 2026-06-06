@@ -6,7 +6,7 @@
 
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background: #0a0e27;
+    background: #1a1d3a; /* Светлее чем было */
     color: #ffffff;
     min-height: 100vh;
     padding-bottom: 70px;
@@ -19,8 +19,8 @@ body {
     justify-content: space-between;
     align-items: center;
     padding: 15px 20px;
-    background: linear-gradient(135deg, #1a1f4e 0%, #0d1137 100%);
-    border-bottom: 2px solid #2d3580;
+    background: linear-gradient(135deg, #2a2d4a 0%, #1e213a 100%); /* Светлее */
+    border-bottom: 2px solid #3d4070;
 }
 
 .user-info {
@@ -36,7 +36,7 @@ body {
     border-radius: 50%;
     border: 3px solid #7c3aed;
     overflow: hidden;
-    background: #1e2456;
+    background: #2e3160;
 }
 
 .avatar {
@@ -110,19 +110,19 @@ body {
 
 .main-layout {
     display: flex;
-    gap: 15px;
+    gap: 20px;
     padding: 0 20px;
     align-items: flex-start;
 }
 
-/* Топ */
+/* Топ - тёмно-синий с рамкой как на скриншоте */
 .top-container {
     flex: 1;
     max-width: 45%;
-    background: linear-gradient(135deg, #1e2456 0%, #151a3e 100%);
-    border-radius: 20px;
+    background: linear-gradient(135deg, #2a2d5a 0%, #1e2145 100%); /* Светлее */
+    border-radius: 24px;
     padding: 20px;
-    border: 3px solid #2d3580;
+    border: 3px solid #3d4080; /* Светлее рамка */
 }
 
 .top-title {
@@ -135,20 +135,20 @@ body {
 .top-list {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 10px;
 }
 
 .top-item {
     display: flex;
     align-items: center;
-    padding: 12px 15px;
-    background: rgba(30, 36, 86, 0.6);
-    border-radius: 12px;
-    border: 1px solid #2d3580;
+    padding: 14px 16px;
+    background: #2a2d5a; /* Тёмно-синий фон карточек */
+    border-radius: 14px;
+    border: 2px solid #3d4080; /* Рамка как на скриншоте */
     transition: all 0.2s;}
 
 .top-item:hover {
-    background: rgba(45, 53, 128, 0.4);
+    background: #353870;
     transform: translateX(5px);
 }
 
@@ -156,7 +156,7 @@ body {
     font-size: 20px;
     font-weight: 800;
     color: #fbbf24;
-    width: 35px;
+    width: 40px;
     text-align: center;
     margin-right: 10px;
 }
@@ -181,31 +181,31 @@ body {
     color: #10b981;
 }
 
-/* Кнопки меню */
+/* Кнопки меню - фиолетовые */
 .menu-buttons-container {
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 14px;
 }
 
 .menu-btn {
-    background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); /* Светлее фиолетовый */
     border: none;
-    border-radius: 16px;
-    padding: 18px 25px;
-    color: #ffffff;    font-size: 17px;
+    border-radius: 18px;
+    padding: 20px 25px;
+    color: #ffffff;    font-size: 18px;
     font-weight: 700;
     cursor: pointer;
     transition: all 0.2s;
     text-align: center;
-    box-shadow: 0 4px 15px rgba(124, 58, 237, 0.3);
+    box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
     width: 100%;
 }
 
 .menu-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(124, 58, 237, 0.5);
+    box-shadow: 0 6px 20px rgba(139, 92, 246, 0.6);
 }
 
 .menu-btn:active {
@@ -221,11 +221,11 @@ body {
 }
 
 .game-card {
-    background: linear-gradient(135deg, #1e2456 0%, #151a3e 100%);
+    background: linear-gradient(135deg, #2a2d5a 0%, #1e2145 100%);
     border-radius: 16px;
     padding: 20px;
     text-align: center;
-    border: 2px solid #2d3580;
+    border: 2px solid #3d4080;
     transition: all 0.2s;
 }
 
@@ -276,10 +276,10 @@ body {
     display: flex;
     align-items: center;
     gap: 15px;
-    background: linear-gradient(135deg, #1e2456 0%, #151a3e 100%);
+    background: linear-gradient(135deg, #2a2d5a 0%, #1e2145 100%);
     border-radius: 16px;
     padding: 15px;
-    border: 2px solid #2d3580;
+    border: 2px solid #3d4080;
 }
 
 .catalog-icon {
@@ -326,8 +326,8 @@ body {
 .form-group input {
     width: 100%;
     padding: 14px 16px;
-    background: #1e2456;
-    border: 2px solid #2d3580;
+    background: #2a2d5a;
+    border: 2px solid #3d4080;
     border-radius: 12px;
     color: #ffffff;
     font-size: 16px;
@@ -372,7 +372,7 @@ body {
     border: 4px solid #7c3aed;
     margin: 0 auto 15px;
     overflow: hidden;
-    background: #1e2456;
+    background: #2e3160;
 }
 
 .profile-avatar {
@@ -423,10 +423,10 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: linear-gradient(135deg, #1e2456 0%, #151a3e 100%);
+    background: linear-gradient(135deg, #2a2d5a 0%, #1e2145 100%);
     border-radius: 14px;
     padding: 14px 20px;
-    border: 2px solid #2d3580;
+    border: 2px solid #3d4080;
 }
 
 .stat-label {
@@ -448,8 +448,8 @@ body {
     right: 0;
     display: flex;
     justify-content: space-around;
-    background: linear-gradient(135deg, #1a1f4e 0%, #0d1137 100%);
-    border-top: 2px solid #2d3580;
+    background: linear-gradient(135deg, #2a2d4a 0%, #1e213a 100%);
+    border-top: 2px solid #3d4070;
     padding: 10px 0;
     z-index: 100;
 }
@@ -488,8 +488,7 @@ body {
 
 /* Адаптив */
 @media (max-width: 768px) {
-    .main-layout {
-        flex-direction: column;
+    .main-layout {        flex-direction: column;
     }
     
     .top-container {
