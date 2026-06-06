@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- ХЕДЕР -->
+
     <header class="app-header">
         <div class="user-info">
             <div class="avatar-wrapper">
@@ -26,52 +26,91 @@
         </div>
     </header>
 
-    <!-- ОСНОВНОЙ КОНТЕНТ -->
     <main>
-        <!-- ГЛАВНАЯ -->
         <section id="tab-home" class="tab-content active">
             <h1 class="page-title">Главная:</h1>
-            
             <div class="main-layout">
-                <!-- Левая колонка: Топ -->
                 <div class="top-container">
                     <h2 class="top-title">Топ:</h2>
                     <div id="top-list" class="top-list">
-                        <div style="text-align:center; padding:20px; color:#888;">Загрузка...</div>
+                        <div style="text-align:center;padding:20px;color:#888;">Загрузка...</div>
                     </div>
                 </div>
-                
-                <!-- Правая колонка: Кнопки меню -->
                 <div class="menu-buttons-container">
                     <button class="menu-btn" onclick="switchTab('games')">🎮 Игры</button>
                     <button class="menu-btn" onclick="switchTab('transfer')">💸 Переводы</button>
-                    <button class="menu-btn" onclick="switchTab('catalog')">📦 Каталог</button>
-                    <button class="menu-btn" onclick="switchTab('profile')">👤 Профиль</button>
+                    <button class="menu-btn" onclick="switchTab('profile')"> Профиль</button>
+                    <button class="menu-btn" onclick="switchTab('catalog')"> Каталог</button>
                 </div>
             </div>
         </section>
 
-        <!-- ИГРЫ -->
         <section id="tab-games" class="tab-content">
             <h1 class="page-title">Игры:</h1>
             <div id="games-list" class="games-grid"></div>
         </section>
-        <!-- БЛЭКДЖЕК -->
+
+        <section id="tab-catalog" class="tab-content">
+            <h1 class="page-title">Каталог:</h1>
+            <div id="catalog-list" class="catalog-grid"></div>
+        </section>
+
+        <section id="tab-transfer" class="tab-content">
+            <h1 class="page-title">Переводы:</h1>
+            <div class="transfer-form">
+                <div class="form-group">
+                    <label>Получатель (@username):</label>
+                    <input type="text" id="transfer-to" placeholder="@username">
+                </div>
+                <div class="form-group">
+                    <label>Сумма:</label>
+                    <input type="number" id="transfer-amount" placeholder="100" min="1">
+                </div>
+                <div class="form-group">
+                    <label>Сообщение:</label>
+                    <input type="text" id="transfer-comment" placeholder="">
+                </div>
+                <button class="action-btn" onclick="sendTransfer()">Перевести</button>
+            </div>
+        </section>
+
+        <section id="tab-profile" class="tab-content">
+            <div class="profile-card">
+                <div class="profile-avatar-wrapper">
+                    <img id="profile-avatar" src="" alt="" class="profile-avatar">
+                    <span class="avatar-placeholder-large">?</span>
+                </div>
+                <h2 id="profile-nickname" class="profile-name">Загрузка...</h2>
+                <div id="profile-balance" class="profile-balance">0 💰</div>
+                <div class="profile-stats">
+                    <div class="stat-item">
+                        <span class="stat-label">Место в топе</span>
+                        <span id="stat-rank" class="stat-value">-</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Игр сыграно</span>
+                        <span id="stat-games" class="stat-value">-</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Выиграно</span>
+                        <span id="stat-won" class="stat-value">-</span>
+                    </div>
+                </div>
+            </div>
+        </section>
         <section id="game-blackjack" class="tab-content game-section">
             <div class="game-header">
                 <button class="back-btn" onclick="closeGame('blackjack')">← Назад</button>
-                <h2>🃏 Блэкджек</h2>
+                <h2> Блэкджек</h2>
             </div>
             <div class="bj-table">
                 <div class="hand-area">
-                    <div class="hand-label">Дилер</div>
+                    <div class="hand-label">Дилер: <span id="dealer-score">0</span></div>
                     <div id="dealer-cards" class="cards-row"></div>
-                    <div id="dealer-score" class="score-display">0</div>
                 </div>
                 <div class="hand-area">
+                    <div class="hand-label">Вы: <span id="player-score">0</span></div>
                     <div id="player-cards" class="cards-row"></div>
-                    <div id="player-score" class="score-display">0</div>
-                    <div class="hand-label">Ты</div>
                 </div>
             </div>
             <div id="bet-controls" class="game-controls">
@@ -83,12 +122,11 @@
             </div>
             <div id="play-controls" class="game-controls" style="display:none;">
                 <button class="action-btn hit-btn" onclick="hit()">👆 Ещё</button>
-                <button class="action-btn stand-btn" onclick="stand()">✋ Хватит</button>
+                <button class="action-btn stand-btn" onclick="stand()"> Хватит</button>
             </div>
             <div id="bj-message" class="game-message"></div>
         </section>
 
-<!-- СЛОТЫ -->
         <section id="game-slots" class="tab-content game-section">
             <div class="game-header">
                 <button class="back-btn" onclick="closeGame('slots')">← Назад</button>
@@ -104,53 +142,37 @@
                     <label>Ставка:</label>
                     <input type="number" id="slots-bet" placeholder="100" min="10">
                 </div>
-                <button class="action-btn" onclick="spinSlots()">🎰 Крутить</button>
+                <button class="action-btn" onclick="spinSlots()"> Крутить</button>
             </div>
             <div id="slots-message" class="game-message"></div>
         </section>
-
-<!-- РУЛЕТКА -->
-        <!-- РУЛЕТКА -->
-        <!-- РУЛЕТКА -->
         <section id="game-roulette" class="tab-content game-section">
             <div class="game-header">
                 <button class="back-btn" onclick="closeGame('roulette')">← Назад</button>
                 <h2>🎡 Рулетка</h2>
             </div>
-    
             <div class="roulette-display">
                 <div class="roulette-number" id="roulette-result">?</div>
             </div>
-    
             <div class="game-controls">
                 <div class="form-group">
                     <label>Ставка:</label>
                     <input type="number" id="roulette-bet" placeholder="100" min="10">
                 </div>
-        
                 <div class="bet-buttons-row">
-                    <button class="bet-btn red" onclick="placeRouletteBet('red')">
-                        🔴 Красное (x2)
-                    </button>
-                    <button class="bet-btn black" onclick="placeRouletteBet('black')">
-                        ⚫ Чёрное (x2)
-                    </button>
-                    <button class="bet-btn green" onclick="placeRouletteBet('green')">
-                        🟢 Зелёное (x14)
-                    </button>
+                    <button class="bet-btn red" onclick="placeRouletteBet('red')">🔴 Красное (x2)</button>
+                    <button class="bet-btn black" onclick="placeRouletteBet('black')">⚫ Чёрное (x2)</button>
+                    <button class="bet-btn green" onclick="placeRouletteBet('green')">🟢 Зелёное (x14)</button>
                 </div>
-        
                 <div class="form-group">
                     <label>Или поставьте на число (0-36):</label>
                     <input type="number" id="roulette-number" placeholder="0-36" min="0" max="36">
                 </div>
                 <button class="action-btn" onclick="placeRouletteBet('number')">Число (x36)</button>
             </div>
-    
             <div id="roulette-message" class="game-message"></div>
         </section>
-        
-<!-- ПОКЕР -->
+
         <section id="game-poker" class="tab-content game-section">
             <div class="game-header">
                 <button class="back-btn" onclick="closeGame('poker')">← Назад</button>
@@ -181,60 +203,8 @@
             </div>
             <div id="poker-message" class="game-message"></div>
         </section>
-
-        <!-- КАТАЛОГ -->
-        <section id="tab-catalog" class="tab-content">
-            <h1 class="page-title">Каталог:</h1>
-            <div id="catalog-list" class="catalog-grid"></div>
-        </section>
-
-        <!-- ПЕРЕВОДЫ -->
-        <section id="tab-transfer" class="tab-content">
-            <h1 class="page-title">Переводы:</h1>
-            <div class="transfer-form">
-                <div class="form-group">
-                    <label>Получатель (@username):</label>
-                    <input type="text" id="transfer-to" placeholder="@username">
-                </div>
-                <div class="form-group">
-                    <label>Сумма:</label>
-                    <input type="number" id="transfer-amount" placeholder="100" min="1">
-                </div>
-                <div class="form-group">
-                    <label>Сообщение:</label>
-                    <input type="text" id="transfer-comment" placeholder="">
-                </div>
-                <button class="action-btn" onclick="sendTransfer()">Перевести</button>
-            </div>
-        </section>
-
-        <!-- ПРОФИЛЬ -->
-        <section id="tab-profile" class="tab-content">
-            <div class="profile-card">
-                <div class="profile-avatar-wrapper">
-                    <img id="profile-avatar" src="" alt="" class="profile-avatar">
-                    <span class="avatar-placeholder-large">?</span>
-                </div>
-                <h2 id="profile-nickname" class="profile-name">Загрузка...</h2>
-                <div id="profile-balance" class="profile-balance">0 💰</div>
-                <div class="profile-stats">
-                    <div class="stat-item">
-                        <span class="stat-label">Место в топе</span>
-                        <span id="stat-rank" class="stat-value">-</span>
-                    </div>
-                    <div class="stat-item">                        <span class="stat-label">Игр сыграно</span>
-                        <span id="stat-games" class="stat-value">-</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">Выиграно</span>
-                        <span id="stat-won" class="stat-value">-</span>
-                    </div>
-                </div>
-            </div>
-        </section>
     </main>
 
-    <!-- НИЖНЕЕ МЕНЮ -->
     <nav class="bottom-nav">
         <button class="nav-btn active" data-tab="home">🏠<span>Главная</span></button>
         <button class="nav-btn" data-tab="games">🎮<span>Игры</span></button>
