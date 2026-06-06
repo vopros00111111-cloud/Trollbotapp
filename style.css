@@ -103,79 +103,59 @@ body {
 
 /* ГЛАВНАЯ СТРАНИЦА */
 .page-title {
-    font-size: 28px;
+    font-size: 24px;
     font-weight: 800;
     color: #a78bfa;
-    padding: 20px 20px 15px;
+    padding: 15px 15px 10px;
 }
 
 .main-layout {
     display: flex;
-    gap: 20px;
-    padding: 0 20px;
-    align-items: flex-start;
-}
-
-/* Топ - тёмно-синий с рамкой как на скриншоте */
-/* ГЛАВНАЯ СТРАНИЦА */
-.page-title {
-    font-size: 28px;
-    font-weight: 800;
-    color: #a78bfa;
-    padding: 20px 20px 15px;
-}
-
-.main-layout {
-    display: flex;
-    gap: 15px;
-    padding: 0 20px;
+    gap: 10px;
+    padding: 0 15px;
     align-items: stretch;
+    flex-direction: row !important; /* Принудительно в строку */
 }
 
-/* Топ - компактный */
+/* Топ - компактный слева */
 .top-container {
     flex: 1;
-    max-width: 45%;
+    max-width: 48%;
     background: linear-gradient(135deg, #2a2d5a 0%, #1e2145 100%);
     border-radius: 16px;
-    padding: 15px;
+    padding: 12px;
     border: 2px solid #3d4080;
 }
 
 .top-title {
-    font-size: 20px;
+    font-size: 18px;
     font-weight: 800;
     color: #a78bfa;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
 }
 
 .top-list {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 5px;
 }
 
 .top-item {
     display: flex;
     align-items: center;
-    padding: 8px 10px;
+    padding: 6px 8px;
     background: rgba(30, 36, 86, 0.6);
-    border-radius: 10px;
+    border-radius: 8px;
     border: 1px solid #3d4080;
     transition: all 0.2s;
 }
 
-.top-item:hover {
-    background: rgba(45, 53, 128, 0.4);    transform: translateX(3px);
-}
-
-.top-place {
-    font-size: 16px;
+.top-place {    font-size: 14px;
     font-weight: 800;
     color: #fbbf24;
-    width: 28px;
+    width: 24px;
     text-align: center;
-    margin-right: 8px;
+    margin-right: 6px;
 }
 
 .top-item:nth-child(1) .top-place { color: #ffd700; }
@@ -184,7 +164,7 @@ body {
 
 .top-name {
     flex: 1;
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 600;
     color: #e0e7ff;
     overflow: hidden;
@@ -193,7 +173,7 @@ body {
 }
 
 .top-score {
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 800;
     color: #10b981;
 }
@@ -203,47 +183,48 @@ body {
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 8px;
     justify-content: flex-start;
+    max-width: 48%;
 }
 
 .menu-btn {
     background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
     border: none;
-    border-radius: 14px;
-    padding: 16px 20px;
+    border-radius: 12px;
+    padding: 12px 10px;
     color: #ffffff;
-    font-size: 16px;
+    font-size: 14px;
     font-weight: 700;
-    cursor: pointer;    transition: all 0.2s;
+    cursor: pointer;
+    transition: all 0.2s;
     text-align: center;
-    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
-    width: 100%;
+    box-shadow: 0 3px 10px rgba(139, 92, 246, 0.3);    width: 100%;
 }
 
 .menu-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(139, 92, 246, 0.5);
+    box-shadow: 0 5px 15px rgba(139, 92, 246, 0.5);
 }
 
 .menu-btn:active {
     transform: translateY(0);
 }
 
-/* Адаптив для мобильных */
+/* УДАЛИ или закомментируй этот блок: */
+/*
 @media (max-width: 768px) {
     .main-layout {
         flex-direction: column;
     }
-    
     .top-container {
         max-width: 100%;
     }
-    
     .menu-buttons-container {
         width: 100%;
     }
-    }
+}
+*/
 /* ИГРЫ */
 .games-grid {
     display: grid;
