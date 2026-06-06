@@ -462,7 +462,57 @@ async function loadCatalog() {
         console.error('Ошибка загрузки каталога:', error);
     }
 }
+// ============================================
+// ПОКЕР
+// ============================================
+async function createPokerTable() {
+    const bet = parseInt(document.getElementById('poker-bet').value);
+    const maxPlayers = parseInt(document.getElementById('poker-players').value);
+    
+    if (!bet || bet < 100) {
+        tg.showAlert('❌ Минимальная ставка: 100 монет');
+        return;
+    }
+    
+    if (bet > currentBalance) {
+        tg.showAlert('❌ Недостаточно монет!');
+        return;
+    }
+    
+    try {
+        const response = await apiRequest('/poker/create', 'POST', {
+            user_id: currentUser.id,
+            bet: bet,
+            max_players: maxPlayers
+        });
+        
+        if (response.success) {
+            tg.showAlert(`✅ Стол создан!\n\n💰 Ставка: ${bet}\n👥 Игроков: ${maxPlayers}\n\nПриглашение отправлено в чат!`);
+            closeGame('poker');
+            await loadBalance();
+        }
+    } catch (error) {
+        console.error('Ошибка:', error);
+        tg.showAlert('❌ Ошибка создания стола');
+    }
+}
 
+async function joinPokerTable(tableId) {
+    try {
+        const response = await apiRequest('/poker/join', 'POST', {
+            user_id: currentUser.id,
+            table_id: tableId
+        });
+        
+        if (response.success) {
+            document.getElementById('poker-lobby').style.display = 'none';
+            document.getElementById('poker-game').style.display = 'block';
+            await loadBalance();
+        }
+    } catch (error) {
+        tg.showAlert('❌ Ошибка присоединения');
+    }
+}
 // ============================================
 // ОТРИСОВКА
 // ============================================
@@ -502,7 +552,7 @@ function renderGames(games) {
         
         let buttons = '';
         if (game.id === 'poker' || game.id === 'durak') {
-            buttons = `<button class="game-action-btn" onclick="alert('Функция в разработке')">Создать стол</button>`;
+            buttons = `<button class="game-action-btn" onclick="openGame('${game.id}')">Создать стол</button>`;
         } else if (game.id === 'blackjack' || game.id === 'slots' || game.id === 'roulette') {
             buttons = `<button class="game-action-btn" onclick="openGame('${game.id}')">Играть</button>`;
         } else {
@@ -541,7 +591,26 @@ function renderCatalog(items) {
         container.appendChild(card);
     });
 }
+// ============================================
+// НАВИГАЦИЯ ПО ИГРАМ
+// ============================================
+function openGame(gameName) {
+    // Скрываем все вкладки
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    // Показываем игру
+    document.getElementById(`game-${gameName}`).classList.add('active');
+    // Скрываем нижнее меню
+    document.querySelector('.bottom-nav').classList.add('hidden');
+}
 
+function closeGame(gameName) {
+    // Скрываем игру
+    document.getElementById(`game-${gameName}`).classList.remove('active');
+    // Показываем вкладку игр
+    document.getElementById('tab-games').classList.add('active');
+    // Показываем нижнее меню
+    document.querySelector('.bottom-nav').classList.remove('hidden');
+}
 // ============================================
 // НАВИГАЦИЯ
 // ============================================
