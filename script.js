@@ -504,7 +504,7 @@ function renderGames(games) {
         if (game.id === 'poker' || game.id === 'durak') {
             buttons = `<button class="game-action-btn" onclick="alert('Функция в разработке')">Создать стол</button>`;
         } else if (game.id === 'blackjack' || game.id === 'slots' || game.id === 'roulette') {
-            buttons = `<button class="game-action-btn" onclick="alert('Функция в разработке')">Играть</button>`;
+            buttons = `<button class="game-action-btn" onclick="openGame('${game.id}')">Играть</button>`;
         } else {
             buttons = `<button class="game-action-btn">Играть</button>`;
         }
