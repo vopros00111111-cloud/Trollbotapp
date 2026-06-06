@@ -45,15 +45,88 @@
                 <div class="menu-buttons-container">
                     <button class="menu-btn" onclick="switchTab('games')">🎮 Игры</button>
                     <button class="menu-btn" onclick="switchTab('transfer')">💸 Переводы</button>
-                    <button class="menu-btn" onclick="switchTab('profile')">👤 Профиль</button>
                     <button class="menu-btn" onclick="switchTab('catalog')">📦 Каталог</button>
-                </div>            </div>
+                    <button class="menu-btn" onclick="switchTab('profile')">👤 Профиль</button>
+                </div>
+            </div>
         </section>
 
         <!-- ИГРЫ -->
         <section id="tab-games" class="tab-content">
             <h1 class="page-title">Игры:</h1>
             <div id="games-list" class="games-grid"></div>
+        </section>
+        <!-- БЛЭКДЖЕК -->
+        <section id="game-blackjack" class="game-section">
+            <div class="game-header">
+                <button class="back-btn" onclick="closeGame('blackjack')">← Назад</button>
+                <h2>🃏 Блэкджек</h2>
+            </div>
+            <div class="bj-table">
+                <div class="hand-area">
+                    <div class="hand-label">Дилер: <span id="dealer-score">0</span></div>
+                    <div id="dealer-cards" class="cards-row"></div>
+                </div>
+                <div class="hand-area">
+                    <div class="hand-label">Вы: <span id="player-score">0</span></div>
+                    <div id="player-cards" class="cards-row"></div>
+                </div>
+            </div>
+            <div id="bet-controls" class="game-controls">
+                <input type="number" id="bj-bet" placeholder="Ставка (мин. 10)" min="10">
+                <button class="action-btn" onclick="startBlackjack()">Раздать карты</button>
+            </div>
+            <div id="play-controls" class="game-controls" style="display:none;">
+                <button class="action-btn hit-btn" onclick="hit()">👆 Ещё</button>
+                <button class="action-btn stand-btn" onclick="stand()">✋ Хватит</button>
+            </div>
+            <div id="bj-message" class="game-message"></div>
+        </section>
+
+<!-- СЛОТЫ -->
+        <section id="game-slots" class="game-section">
+            <div class="game-header">
+                <button class="back-btn" onclick="closeGame('slots')">← Назад</button>
+                <h2>🎰 Слоты</h2>
+            </div>
+            <div class="slots-machine">
+                <div id="reel1" class="reel">🍒</div>
+                <div id="reel2" class="reel">🍒</div>
+                <div id="reel3" class="reel">🍒</div>
+            </div>
+            <div class="game-controls">
+                <input type="number" id="slots-bet" placeholder="Ставка (мин. 10)" min="10">
+                <button class="action-btn" onclick="spinSlots()">🎰 Крутить</button>
+            </div>
+            <div id="slots-message" class="game-message"></div>
+        </section>
+
+<!-- РУЛЕТКА -->
+        <section id="game-roulette" class="game-section">
+            <div class="game-header">
+                <button class="back-btn" onclick="closeGame('roulette')">← Назад</button>
+                <h2>🎡 Рулетка</h2>
+            </div>
+            <div class="roulette-container">
+                <div class="roulette-wheel" id="roulette-wheel">
+                    <div class="wheel-center">
+                        <div class="wheel-number" id="roulette-result">?</div>
+                    </div>
+                </div>
+            </div>
+            <div class="game-controls">
+                <input type="number" id="roulette-bet" placeholder="Ставка (мин. 10)" min="10">
+                <div class="bet-buttons">
+                    <button class="bet-btn red" onclick="placeRouletteBet('red')">🔴 x2</button>
+                    <button class="bet-btn black" onclick="placeRouletteBet('black')">⚫ x2</button>
+                    <button class="bet-btn green" onclick="placeRouletteBet('green')">🟢 x14</button>
+                </div>
+                <div class="number-bet">
+                    <input type="number" id="roulette-number" placeholder="Число 0-36" min="0" max="36">
+                    <button class="action-btn" onclick="placeRouletteBet('number')">Число x36</button>
+                </div>
+            </div>
+            <div id="roulette-message" class="game-message"></div>
         </section>
 
         <!-- КАТАЛОГ -->
