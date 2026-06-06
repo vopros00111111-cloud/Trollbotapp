@@ -96,7 +96,8 @@ body {
 }
 
 .balance-value {
-    font-size: 20px;    font-weight: 800;
+    font-size: 20px;
+    font-weight: 800;
     color: #fbbf24;
 }
 
@@ -116,49 +117,65 @@ body {
 }
 
 /* Топ - тёмно-синий с рамкой как на скриншоте */
+/* ГЛАВНАЯ СТРАНИЦА */
+.page-title {
+    font-size: 28px;
+    font-weight: 800;
+    color: #a78bfa;
+    padding: 20px 20px 15px;
+}
+
+.main-layout {
+    display: flex;
+    gap: 15px;
+    padding: 0 20px;
+    align-items: stretch;
+}
+
+/* Топ - компактный */
 .top-container {
     flex: 1;
     max-width: 45%;
-    background: linear-gradient(135deg, #2a2d5a 0%, #1e2145 100%); /* Светлее */
-    border-radius: 24px;
-    padding: 20px;
-    border: 3px solid #3d4080; /* Светлее рамка */
+    background: linear-gradient(135deg, #2a2d5a 0%, #1e2145 100%);
+    border-radius: 16px;
+    padding: 15px;
+    border: 2px solid #3d4080;
 }
 
 .top-title {
-    font-size: 24px;
+    font-size: 20px;
     font-weight: 800;
     color: #a78bfa;
-    margin-bottom: 15px;
+    margin-bottom: 10px;
 }
 
 .top-list {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 6px;
 }
 
 .top-item {
     display: flex;
     align-items: center;
-    padding: 14px 16px;
-    background: #2a2d5a; /* Тёмно-синий фон карточек */
-    border-radius: 14px;
-    border: 2px solid #3d4080; /* Рамка как на скриншоте */
-    transition: all 0.2s;}
+    padding: 8px 10px;
+    background: rgba(30, 36, 86, 0.6);
+    border-radius: 10px;
+    border: 1px solid #3d4080;
+    transition: all 0.2s;
+}
 
 .top-item:hover {
-    background: #353870;
-    transform: translateX(5px);
+    background: rgba(45, 53, 128, 0.4);    transform: translateX(3px);
 }
 
 .top-place {
-    font-size: 20px;
+    font-size: 16px;
     font-weight: 800;
     color: #fbbf24;
-    width: 40px;
+    width: 28px;
     text-align: center;
-    margin-right: 10px;
+    margin-right: 8px;
 }
 
 .top-item:nth-child(1) .top-place { color: #ffd700; }
@@ -167,7 +184,7 @@ body {
 
 .top-name {
     flex: 1;
-    font-size: 14px;
+    font-size: 12px;
     font-weight: 600;
     color: #e0e7ff;
     overflow: hidden;
@@ -176,42 +193,57 @@ body {
 }
 
 .top-score {
-    font-size: 16px;
+    font-size: 13px;
     font-weight: 800;
     color: #10b981;
 }
 
-/* Кнопки меню - фиолетовые */
+/* Кнопки меню справа */
 .menu-buttons-container {
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    gap: 10px;
+    justify-content: flex-start;
 }
 
 .menu-btn {
-    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); /* Светлее фиолетовый */
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
     border: none;
-    border-radius: 18px;
-    padding: 20px 25px;
-    color: #ffffff;    font-size: 18px;
+    border-radius: 14px;
+    padding: 16px 20px;
+    color: #ffffff;
+    font-size: 16px;
     font-weight: 700;
-    cursor: pointer;
-    transition: all 0.2s;
+    cursor: pointer;    transition: all 0.2s;
     text-align: center;
-    box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
     width: 100%;
 }
 
 .menu-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(139, 92, 246, 0.6);
+    box-shadow: 0 6px 16px rgba(139, 92, 246, 0.5);
 }
 
 .menu-btn:active {
     transform: translateY(0);
 }
 
+/* Адаптив для мобильных */
+@media (max-width: 768px) {
+    .main-layout {
+        flex-direction: column;
+    }
+    
+    .top-container {
+        max-width: 100%;
+    }
+    
+    .menu-buttons-container {
+        width: 100%;
+    }
+    }
 /* ИГРЫ */
 .games-grid {
     display: grid;
