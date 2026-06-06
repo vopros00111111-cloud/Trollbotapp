@@ -374,7 +374,106 @@ async function spinSlots() {
 // ============================================
 // РУЛЕТКА
 // ============================================
-
+async function placeRouletteBet(choice) {
+    const bet = parseInt(document.getElementById('roulette-bet').value);
+    
+    if (!bet || bet < 10) {
+        tg.showAlert('❌ Минимальная ставка: 10 монет');
+        return;
+    }
+    
+    if (bet > currentBalance) {
+        tg.showAlert('❌ Недостаточно монет!');
+        return;
+    }
+    
+    let betNumber = null;
+    if (choice === 'number') {
+        betNumber = parseInt(document.getElementById('roulette-number').value);
+        if (isNaN(betNumber) || betNumber < 0 || betNumber > 36) {
+            tg.showAlert('❌ Введите число от 0 до 36');
+            return;
+        }
+    }
+    
+    try {
+        await apiRequest('/game-bet', 'POST', {
+            user_id: currentUser.id,
+            amount: bet,
+            game: 'roulette'
+        });
+    } catch (error) {
+        tg.showAlert('❌ Ошибка списания ставки');
+        return;
+    }
+    
+    const resultEl = document.getElementById('roulette-result');
+    const msgEl = document.getElementById('roulette-message');
+    
+    msgEl.innerText = '';
+    msgEl.className = 'game-message';
+    
+    // Убираем старые цвета
+    resultEl.classList.remove('red', 'black', 'green');
+    resultEl.classList.add('spinning');
+    
+    // Быстрая смена чисел (2 секунды)
+    const spinDuration = 2000;
+    const spinInterval = 80;
+    const startTime = Date.now();
+    
+    const spinTimer = setInterval(() => {
+        const elapsed = Date.now() - startTime;
+        resultEl.innerText = Math.floor(Math.random() * 37);
+        
+        if (elapsed >= spinDuration) {
+            clearInterval(spinTimer);
+            
+            // Финальное число
+            const number = Math.floor(Math.random() * 37);
+            resultEl.innerText = number;
+            resultEl.classList.remove('spinning');
+            
+            // Определяем цвет
+            let color;
+            if (number === 0) color = 'green';
+            else if ([1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36].includes(number)) color = 'red';
+            else color = 'black';
+            
+            // Добавляем цвет
+            resultEl.classList.add(color);
+            
+            // Проверяем выигрыш
+            let winAmount = 0;
+            let message = '';
+            
+            if (choice === 'number' && betNumber === number) {
+                winAmount = bet * 36;
+                message = `🎯 Выпало ${number}! Вы выиграли ${winAmount} монет!`;
+            } else if (choice === color) {
+                const multiplier = color === 'green' ? 14 : 2;
+                winAmount = bet * multiplier;
+                message = `🎉 Выпало ${number} (${color === 'red' ? 'красное' : color === 'black' ? 'чёрное' : 'зелёное'})! Вы выиграли ${winAmount} монет!`;
+            } else {
+                message = `😔 Выпало ${number} (${color === 'red' ? 'красное' : color === 'black' ? 'чёрное' : 'зелёное'}). Вы проиграли.`;
+            }
+            
+            msgEl.className = winAmount > 0 ? 'game-message win' : 'game-message lose';
+            msgEl.innerText = message;
+            
+            if (winAmount > 0) {
+                try {
+                    await apiRequest('/game-win', 'POST', {
+                        user_id: currentUser.id,
+                        amount: winAmount,
+                        game: 'roulette'
+                    });
+                } catch (error) {}
+            }
+            
+            await loadBalance();
+        }
+    }, spinInterval);}
 // Загрузка каталога
 async function loadCatalog() {
     try {
