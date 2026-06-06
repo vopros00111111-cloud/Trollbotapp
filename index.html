@@ -2,103 +2,76 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>BlessCoin App</title>
-    <link rel="stylesheet" href="style.css">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <!-- Шапка -->
+    <!-- ХЕДЕР -->
     <header class="app-header">
-        <div class="header-top">
-            <div class="user-info">
-                <img src="" alt="Avatar" class="user-avatar" id="header-avatar">
-                <div class="user-details">
-                    <div class="user-nickname" id="header-nickname">Загрузка...</div>
-                    <div class="user-status">Онлайн</div>
-                </div>
-            </div>
-            <div class="balance-display">
-                <div class="balance-label">Баланс:</div>
-                <div class="balance-amount" id="header-balance">0 💰</div>
-            </div>
+        <div class="user-info">
+            <img id="header-avatar" src="" alt="" class="avatar">
+            <span id="header-nickname">Гость</span>
         </div>
+        <div id="header-balance" class="balance">0 💰</div>
     </header>
 
-    <!-- Основной контент -->
-    <main class="app-content">
-        
+    <!-- ОСНОВНОЙ КОНТЕНТ -->
+    <main>
         <!-- ГЛАВНАЯ -->
-        <section id="tab-main" class="tab-content active">
-            <h2 class="section-title">Главная:</h2>
-            <div class="main-grid">
-                <div class="top-container">
-                    <h3>Топ:</h3>
-                    <div class="top-list" id="top-list"></div>
-                </div>
-                <div class="main-buttons">
-                    <button class="main-btn" onclick="switchTab('games')">🎮 Игры</button>
-                    <button class="main-btn" onclick="switchTab('transfer')">💸 Переводы</button>
-                    <button class="main-btn" onclick="switchTab('catalog')">📦 Каталог</button>
-                    <button class="main-btn" onclick="switchTab('profile')">👤 Профиль</button>
-                </div>
+        <section id="tab-home" class="tab-content active">
+            <h2 class="section-title">Главная</h2>
+            <div class="stats-card">
+                <div class="stat-row"><span>🏆 Место:</span> <span id="stat-rank">#-</span></div>
+                <div class="stat-row"><span>🎲 Игр:</span> <span id="stat-games">0</span></div>
+                <div class="stat-row"><span>💰 Выиграно:</span> <span id="stat-won">0</span></div>
             </div>
+            <h3 class="section-title">Топ игроков</h3>
+            <div id="top-list" class="top-list"></div>
         </section>
 
         <!-- ИГРЫ -->
         <section id="tab-games" class="tab-content">
-            <h2 class="section-title">Игры:</h2>
-            <div class="games-grid" id="games-list"></div>
+            <h2 class="section-title">Игры</h2>
+            <div id="games-list" class="games-grid"></div>
         </section>
 
         <!-- КАТАЛОГ -->
         <section id="tab-catalog" class="tab-content">
-            <h2 class="section-title">Каталог:</h2>
-            <div class="catalog-grid" id="catalog-list"></div>
+            <h2 class="section-title">Каталог</h2>
+            <div id="catalog-list" class="catalog-grid"></div>
         </section>
 
         <!-- ПЕРЕВОДЫ -->
         <section id="tab-transfer" class="tab-content">
-            <h2 class="section-title">Переводы:</h2>
-            <div class="transfer-form">
-                <div class="form-group">
-                    <label>Получатель:</label>
-                    <input type="text" placeholder="@username" id="transfer-to">
-                </div>
-                <div class="form-group">
-                    <label>Сумма:</label>
-                    <input type="number" placeholder="Количество монет" id="transfer-amount">
-                </div>
-                <div class="form-group">
-                    <label>Комментарий (необязательно):</label>
-                    <input type="text" placeholder="Сообщение" id="transfer-comment">
-                </div>
-                <button class="action-btn" onclick="sendTransfer()">Отправить перевод</button>
+            <h2 class="section-title">Переводы</h2>
+            <div class="form-group">                <label>Получатель (@username)</label>
+                <input type="text" id="transfer-to" placeholder="@username">
             </div>
+            <div class="form-group">
+                <label>Сумма</label>
+                <input type="number" id="transfer-amount" placeholder="100" min="1">
+            </div>
+            <div class="form-group">
+                <label>Комментарий</label>
+                <input type="text" id="transfer-comment" placeholder="Необязательно">
+            </div>
+            <button class="action-btn" onclick="sendTransfer()">Отправить перевод</button>
         </section>
 
         <!-- ПРОФИЛЬ -->
         <section id="tab-profile" class="tab-content">
-            <div class="profile-header">
-                <img src="" alt="Avatar" class="profile-avatar" id="profile-avatar">
-                <h2 class="profile-nickname" id="profile-nickname">Загрузка...</h2>
+            <h2 class="section-title">Профиль</h2>
+            <div class="profile-card">
+                <img id="profile-avatar" src="" alt="" class="avatar-large">
+                <h3 id="profile-nickname">Гость</h3>
                 <div class="profile-balance" id="profile-balance">0 💰</div>
             </div>
-            <div class="profile-stats">
-                <div class="stat-card">
-                    <div class="stat-value" id="stat-rank">-</div>
-                    <div class="stat-label">Место в топе</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value" id="stat-games">-</div>
-                    <div class="stat-label">Игр сыграно</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value" id="stat-won">-</div>
-                    <div class="stat-label">Выиграно 💰</div>
-                </div>            </div>
         </section>
+
+        <!-- ==================== ИГРОВЫЕ СЕКЦИИ ==================== -->
 
         <!-- БЛЭКДЖЕК -->
         <section id="game-blackjack" class="game-section">
@@ -106,35 +79,24 @@
                 <button class="back-btn" onclick="closeGame('blackjack')">← Назад</button>
                 <h2>🃏 Блэкджек</h2>
             </div>
-            
-            <div class="blackjack-table">
-                <div class="dealer-area">
-                    <h3>Дилер</h3>
-                    <div class="cards" id="dealer-cards"></div>
-                    <div class="score" id="dealer-score">0</div>
+            <div class="bj-table">
+                <div class="hand-area">
+                    <div class="hand-label">Дилер: <span id="dealer-score">0</span></div>
+                    <div id="dealer-cards" class="cards-row"></div>
                 </div>
-                
-                <div class="player-area">
-                    <div class="cards" id="player-cards"></div>
-                    <div class="score" id="player-score">0</div>
-                    <h3>Ты</h3>
+                <div class="hand-area">
+                    <div class="hand-label">Вы: <span id="player-score">0</span></div>
+                    <div id="player-cards" class="cards-row"></div>
                 </div>
             </div>
-            
-            <div class="game-controls">
-                <div class="bet-controls" id="bet-controls">
-                    <label>Ставка:</label>
-                    <input type="number" id="bj-bet" placeholder="Минимум 10" min="10">
-                    <button class="action-btn" onclick="startBlackjack()">Раздать карты</button>
-                </div>
-                
-                <div class="play-controls" id="play-controls" style="display:none;">
-                    <button class="game-btn" onclick="hit()">👆 Ещё</button>
-                    <button class="game-btn" onclick="stand()">✋ Хватит</button>
-                </div>
+            <div id="bet-controls" class="game-controls">
+                <input type="number" id="bj-bet" placeholder="Ставка (мин. 10)" min="10">
+                <button class="action-btn" onclick="startBlackjack()">Раздать карты</button>
             </div>
-            
-            <div class="game-message" id="bj-message"></div>
+            <div id="play-controls" class="game-controls" style="display:none;">
+                <button class="action-btn hit-btn" onclick="hit()">👆 Ещё</button>
+                <button class="action-btn stand-btn" onclick="stand()">✋ Хватит</button>
+            </div>            <div id="bj-message" class="game-message"></div>
         </section>
 
         <!-- СЛОТЫ -->
@@ -143,34 +105,24 @@
                 <button class="back-btn" onclick="closeGame('slots')">← Назад</button>
                 <h2>🎰 Слоты</h2>
             </div>
-            
             <div class="slots-machine">
-                <div class="reels">
-                    <div class="reel" id="reel1">🍒</div>
-                    <div class="reel" id="reel2">🍒</div>
-                    <div class="reel" id="reel3">🍒</div>
-                </div>
+                <div id="reel1" class="reel">🍒</div>
+                <div id="reel2" class="reel">🍒</div>
+                <div id="reel3" class="reel">🍒</div>
             </div>
-            
             <div class="game-controls">
-                <div class="bet-controls">
-                    <label>Ставка:</label>
-                    <input type="number" id="slots-bet" placeholder="Минимум 10" min="10">
-                    <button class="action-btn" onclick="spinSlots()">🎰 Крутить</button>
-                </div>
+                <input type="number" id="slots-bet" placeholder="Ставка (мин. 10)" min="10">
+                <button class="action-btn" onclick="spinSlots()">🎰 Крутить</button>
             </div>
-            
-            <div class="game-message" id="slots-message"></div>
+            <div id="slots-message" class="game-message"></div>
         </section>
 
         <!-- РУЛЕТКА -->
-<!-- РУЛЕТКА -->
         <section id="game-roulette" class="game-section">
             <div class="game-header">
                 <button class="back-btn" onclick="closeGame('roulette')">← Назад</button>
                 <h2>🎡 Рулетка</h2>
             </div>
-    
             <div class="roulette-container">
                 <div class="roulette-wheel" id="roulette-wheel">
                     <div class="wheel-center">
@@ -178,38 +130,26 @@
                     </div>
                 </div>
             </div>
-    
             <div class="game-controls">
-                <div class="bet-input-group">
-                    <label>Ставка:</label>
-                    <input type="number" id="roulette-bet" placeholder="Минимум 10" min="10">
+                <input type="number" id="roulette-bet" placeholder="Ставка (мин. 10)" min="10">
+                <div class="bet-buttons">
+                    <button class="bet-btn red" onclick="placeRouletteBet('red')">🔴 x2</button>
+                    <button class="bet-btn black" onclick="placeRouletteBet('black')">⚫ x2</button>
+                    <button class="bet-btn green" onclick="placeRouletteBet('green')">🟢 x14</button>
                 </div>
-        
-                <div class="roulette-bet-types">
-                    <h3>Выберите ставку:</h3>
-                    <div class="bet-options-colors">
-                        <button class="bet-option red" onclick="placeRouletteBet('red')">🔴 Красное (x2)</button>
-                        <button class="bet-option black" onclick="placeRouletteBet('black')">⚫ Чёрное (x2)</button>
-                        <button class="bet-option green" onclick="placeRouletteBet('green')">🟢 Зелёное (x14)</button>
-                    </div>
-            
-                    <div class="bet-number-section">
-                        <label>Или поставьте на число (0-36):</label>
-                        <input type="number" id="roulette-number" min="0" max="36" placeholder="Число">
-                        <button class="bet-option number-bet" onclick="placeRouletteBet('number')">Число (x36)</button>
-                    </div>
+                <div class="number-bet">
+                    <input type="number" id="roulette-number" placeholder="Число 0-36" min="0" max="36">
+                    <button class="action-btn" onclick="placeRouletteBet('number')">Число x36</button>
                 </div>
             </div>
-    
-            <div class="game-message" id="roulette-message"></div>
+            <div id="roulette-message" class="game-message"></div>
         </section>
-        <!-- ПОКЕР -->
-        <section id="game-poker" class="game-section">
+
+        <!-- ПОКЕР -->        <section id="game-poker" class="game-section">
             <div class="game-header">
                 <button class="back-btn" onclick="closeGame('poker')">← Назад</button>
                 <h2>🃏 Покер</h2>
             </div>
-    
             <div id="poker-lobby">
                 <div class="form-group">
                     <label>Ставка:</label>
@@ -225,7 +165,6 @@
                 </div>
                 <button class="action-btn" onclick="createPokerTable()">Создать стол</button>
             </div>
-    
             <div id="poker-game" style="display:none;">
                 <div class="poker-table">
                     <div class="community-cards" id="community-cards"></div>
@@ -234,22 +173,11 @@
                 </div>
                 <div class="poker-controls" id="poker-controls"></div>
             </div>
-    
-            <div class="game-message" id="poker-message"></div>
+            <div id="poker-message" class="game-message"></div>
         </section>
-
     </main>
 
-    <!-- Нижнее меню -->
-    <nav class="bottom-nav">
-        <button class="nav-btn active" data-tab="main">🏠<br>Главная</button>
-        <button class="nav-btn" data-tab="games">🎮<br>Игры</button>
-        <button class="nav-btn" data-tab="catalog">📦<br>Каталог</button>
-        <button class="nav-btn" data-tab="transfer">💱<br>Переводы</button>
-        <button class="nav-btn" data-tab="profile">👤<br>Профиль</button>
-    </nav>
-
-    <!-- Модальное окно -->
+    <!-- МОДАЛЬНОЕ ОКНО (Дурак) -->
     <div id="modal-create-table" class="modal">
         <div class="modal-content">
             <h3>Создать игровой стол</h3>
@@ -259,29 +187,28 @@
                     <option value="2">2 игрока</option>
                     <option value="3">3 игрока</option>
                     <option value="4">4 игрока</option>
-                    <option value="6">6 игроков</option>
                 </select>
             </div>
             <div class="form-group">
                 <label>Ставка (монет):</label>
-                <input type="number" id="table-bet" placeholder="Минимум 100">
+                <input type="number" id="table-bet" placeholder="Минимум 100" min="100">
             </div>
             <div class="modal-buttons">
-                <button class="cancel-btn" onclick="closeModal()">Отмена</button>
-                <button class="confirm-btn" onclick="confirmCreateTable()">Создать</button>
+                <button class="action-btn cancel" onclick="closeModal()">Отмена</button>
+                <button class="action-btn confirm" onclick="confirmCreateTable()">Создать</button>
             </div>
         </div>
     </div>
 
+    <!-- НИЖНЕЕ МЕНЮ -->
+    <nav class="bottom-nav">
+        <button class="nav-btn active" data-tab="home">🏠<span>Главная</span></button>
+        <button class="nav-btn" data-tab="games">🎮<span>Игры</span></button>
+        <button class="nav-btn" data-tab="catalog">📦<span>Каталог</span></button>
+        <button class="nav-btn" data-tab="transfer">💱<span>Переводы</span></button>
+        <button class="nav-btn" data-tab="profile">👤<span>Профиль</span></button>
+    </nav>
+
     <script src="script.js"></script>
-    <!-- Консоль для мобильных -->
-    <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
-    <script>
-    // Добавляем кнопку эрлады только для отладки
-        if (window.location.hostname.includes('github.io')) {
-            eruda.init();
-            eruda.show();
-        }
-</script>
 </body>
 </html>
