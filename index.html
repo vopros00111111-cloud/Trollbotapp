@@ -175,12 +175,15 @@
             <div id="roulette-message" class="game-message"></div>
         </div>
 
-        <div id="game-poker" class="game-section">
+        <!-- Лобби покера (список столов) -->
+        <div id="poker-lobby-screen" class="game-section">
             <div class="game-header">
                 <button class="back-btn" onclick="closeGame('poker')">← Назад</button>
                 <h2>🃏 Покер</h2>
             </div>
-            <div class="transfer-form" id="poker-lobby">
+    
+            <div class="transfer-form" style="margin-bottom: 20px;">
+                <h3 style="color:#a78bfa;margin-bottom:10px;">Создать новый стол</h3>
                 <div class="form-group">
                     <label>Ставка:</label>
                     <input type="number" id="poker-bet" value="100" min="100">
@@ -195,13 +198,31 @@
                 </div>
                 <button class="action-btn" onclick="createPokerTable()">Создать стол</button>
             </div>
-            <div class="poker-table" id="poker-game" style="display: none;">
-                <div class="pot-info">Банк: <span id="poker-pot">0</span> 💰</div>
-                <div class="community-cards" id="poker-community"></div>
-                <div class="player-hand" id="poker-hand"></div>
+    
+            <h3 style="color:#a78bfa;margin-bottom:10px;">Активные столы</h3>
+            <div id="poker-tables-list" style="display: flex; flex-direction: column; gap: 10px;">
+                Загрузка...
+            </div>
+        </div>
+
+        <!-- Экран игры -->
+        <div id="poker-game-screen" class="game-section">
+            <div class="game-header">
+                <button class="back-btn" onclick="closeGame('poker')">← Назад</button>
+                <h2>🃏 Игровой стол</h2>
+            </div>
+    
+            <div class="poker-table">
+                <div class="pot-info" id="poker-game-status"> Игра идёт...</div>
+                <div style="margin: 10px 0; color: #c4b5fd;" id="poker-game-table-id"></div>
+                <div class="community-cards" id="poker-game-community"></div>
+                <div style="margin: 20px 0;">
+                    <h4 style="color:#a78bfa;">Игроки:</h4>
+                    <div id="poker-game-players" style="color: #c4b5fd;"></div>
+                </div>
                 <div class="poker-controls">
                     <button class="action-btn" onclick="alert('Функция в разработке')">Колл</button>
-                    <button class="action-btn" onclick="closeGame('poker')">Фолд / Выход</button>
+                    <button class="action-btn" onclick="closeGame('poker')">Покинуть стол</button>
                 </div>
             </div>
         </div>
