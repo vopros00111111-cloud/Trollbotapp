@@ -26,7 +26,6 @@
     </header>
 
     <main>
-        <!-- Главная -->
         <div id="tab-home" class="tab-content active">
             <h1 class="page-title">Главная</h1>
             <div class="main-layout">
@@ -43,18 +42,15 @@
             </div>
         </div>
 
-        <!-- Игры -->
         <div id="tab-games" class="tab-content">
             <h1 class="page-title">Игры:</h1>
             <div class="games-grid" id="games-list">Загрузка...</div>
         </div>
-        <!-- Каталог -->
-        <div id="tab-catalog" class="tab-content">
-            <h1 class="page-title">Каталог:</h1>
+
+        <div id="tab-catalog" class="tab-content">            <h1 class="page-title">Каталог:</h1>
             <div class="catalog-grid" id="catalog-list">Загрузка...</div>
         </div>
 
-        <!-- Переводы -->
         <div id="tab-transfer" class="tab-content">
             <h1 class="page-title">Переводы:</h1>
             <div class="transfer-form">
@@ -74,7 +70,6 @@
             </div>
         </div>
 
-        <!-- Профиль -->
         <div id="tab-profile" class="tab-content">
             <div class="profile-card">
                 <div class="profile-avatar-wrapper" id="profile-avatar-wrapper">
@@ -100,11 +95,8 @@
             </div>
         </div>
 
-        <!-- === ИГРОВЫЕ ЭКРАНЫ === -->
-        
-        <!-- Блэкджек -->
-        <div id="game-blackjack" class="game-section">
-            <div class="game-header">
+        <!-- ИГРОВЫЕ ЭКРАНЫ -->
+        <div id="game-blackjack" class="game-section">            <div class="game-header">
                 <button class="back-btn" onclick="closeGame('blackjack')">← Назад</button>
                 <h2>Блэкджек</h2>
             </div>
@@ -132,7 +124,6 @@
             <div id="bj-message" class="game-message"></div>
         </div>
 
-        <!-- Слоты -->
         <div id="game-slots" class="game-section">
             <div class="game-header">
                 <button class="back-btn" onclick="closeGame('slots')">← Назад</button>
@@ -153,10 +144,8 @@
             <div id="slots-message" class="game-message"></div>
         </div>
 
-        <!-- Рулетка -->
         <div id="game-roulette" class="game-section">
-            <div class="game-header">
-                <button class="back-btn" onclick="closeGame('roulette')">← Назад</button>
+            <div class="game-header">                <button class="back-btn" onclick="closeGame('roulette')">← Назад</button>
                 <h2>🎡 Рулетка</h2>
             </div>
             <div class="roulette-display">
@@ -181,7 +170,6 @@
             <div id="roulette-message" class="game-message"></div>
         </div>
 
-        <!-- Покер -->
         <div id="game-poker" class="game-section">
             <div class="game-header">
                 <button class="back-btn" onclick="closeGame('poker')">← Назад</button>
@@ -206,8 +194,7 @@
                 <div class="pot-info">Банк: <span id="poker-pot">0</span> 💰</div>
                 <div class="community-cards" id="poker-community"></div>
                 <div class="player-hand" id="poker-hand"></div>
-                <div class="poker-controls">
-                    <button class="action-btn" onclick="alert('Функция в разработке')">Колл</button>
+                <div class="poker-controls">                    <button class="action-btn" onclick="alert('Функция в разработке')">Колл</button>
                     <button class="action-btn" onclick="closeGame('poker')">Фолд / Выход</button>
                 </div>
             </div>
@@ -232,7 +219,6 @@
         </button>
     </nav>
 
-    <!-- ВАЖНО: Убедись, что имя файла совпадает с твоим скриптом -->
-    <script src="script (4).js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
