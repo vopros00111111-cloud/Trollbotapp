@@ -117,7 +117,7 @@ function renderTop(topList) {
         let medal = (i === 0) ? '🥇' : (i === 1) ? '🥈' : (i === 2) ? '🥉' : (i + 1) + '.';
         const item = document.createElement('div');
         item.className = 'top-item';
-        item.innerHTML = `<span class="top-place">${medal}</span><span class="top-name">@${player.username}</span><span class="top-score">${player.balance.toLocaleString()}</span>`;
+        item.innerHTML = '<span class="top-place">' + medal + '</span><span class="top-name">@' + player.username + '</span><span class="top-score">' + player.balance.toLocaleString() + '</span>';
         container.appendChild(item);
     }
 }
@@ -135,13 +135,13 @@ function renderGames(games) {
         card.className = 'game-card';
         let btnHtml = '';
         if (game.id === 'poker' || game.id === 'durak') {
-            btnHtml = `<button class="game-action-btn" onclick="openGame('${game.id}')">Создать стол</button>`;
+            btnHtml = '<button class="game-action-btn" onclick="openGame(\'' + game.id + '\')">Создать стол</button>';
         } else if (game.id === 'blackjack' || game.id === 'slots' || game.id === 'roulette') {
-            btnHtml = `<button class="game-action-btn" onclick="openGame('${game.id}')">Играть</button>`;
+            btnHtml = '<button class="game-action-btn" onclick="openGame(\'' + game.id + '\')">Играть</button>';
         } else {
-            btnHtml = `<button class="game-action-btn">Играть</button>`;
+            btnHtml = '<button class="game-action-btn">Играть</button>';
         }
-        card.innerHTML = `<div class="game-icon">${game.icon}</div><h3>${game.name}</h3><p>${game.description}</p>${btnHtml}`;
+        card.innerHTML = '<div class="game-icon">' + game.icon + '</div><h3>' + game.name + '</h3><p>' + game.description + '</p>' + btnHtml;
         container.appendChild(card);
     }
 }
@@ -156,12 +156,11 @@ function renderCatalog(items) {
         const item = items[i];
         const card = document.createElement('div');
         card.className = 'catalog-item';
-        card.innerHTML = `<div class="catalog-icon">📦</div><div class="catalog-info"><h4>${item.name}</h4><p>${item.description}</p><div class="catalog-price">${item.price.toLocaleString()} 💰</div></div>`;
+        card.innerHTML = '<div class="catalog-icon">📦</div><div class="catalog-info"><h4>' + item.name + '</h4><p>' + item.description + '</p><div class="catalog-price">' + item.price.toLocaleString() + ' 💰</div></div>';
         container.appendChild(card);
     }
 }
 
-// Навигация
 document.querySelectorAll('.nav-btn').forEach(function(btn) {
     btn.addEventListener('click', function() {
         document.querySelectorAll('.nav-btn').forEach(function(b) { b.classList.remove('active'); });
@@ -195,8 +194,7 @@ function closeGame(gameName) {
 
 async function sendTransfer() {
     const to = document.getElementById('transfer-to').value.trim();
-    const amount = parseInt(document.getElementById('transfer-amount').value);
-    const comment = document.getElementById('transfer-comment').value.trim();
+    const amount = parseInt(document.getElementById('transfer-amount').value);    const comment = document.getElementById('transfer-comment').value.trim();
     if (!to) { tg.showAlert('❌ Введите получателя'); return; }
     if (!amount || amount <= 0) { tg.showAlert('❌ Введите сумму'); return; }
     if (amount > currentBalance) { tg.showAlert('❌ Недостаточно монет'); return; }
@@ -244,8 +242,8 @@ function renderCard(card, hidden) {
     const isRed = card.suit === '♥️' || card.suit === '♦️';
     return '<div class="card ' + (isRed ? 'red' : 'black') + '">' + card.rank + card.suit + '</div>';
 }
-function updateBlackjackUI() {
-    document.getElementById('player-cards').innerHTML = bjGame.playerHand.map(function(c) { return renderCard(c); }).join('');
+
+function updateBlackjackUI() {    document.getElementById('player-cards').innerHTML = bjGame.playerHand.map(function(c) { return renderCard(c); }).join('');
     const dealerHidden = bjGame.dealerHand.length === 2 && !bjGame.gameOver;
     document.getElementById('dealer-cards').innerHTML = bjGame.dealerHand.map(function(c, i) { return renderCard(c, i === 1 && dealerHidden); }).join('');
     document.getElementById('player-score').innerText = calculateScore(bjGame.playerHand);
@@ -293,9 +291,8 @@ async function hit() {
 async function stand() {
     if (bjGame.gameOver) return;
     bjGame.gameOver = true;
-    while (calculateScore(bjGame.dealerHand) < 17) { 
-        bjGame.dealerHand.push(bjGame.deck.pop());
-        await new Promise(function(r) { setTimeout(r, 500); });
+    while (calculateScore(bjGame.dealerHand) < 17) {
+        bjGame.dealerHand.push(bjGame.deck.pop());        await new Promise(function(r) { setTimeout(r, 500); });
         updateBlackjackUI();
     }
     const ps = calculateScore(bjGame.playerHand);
@@ -344,8 +341,7 @@ async function spinSlots() {
     const result = [
         slotSymbols[Math.floor(Math.random() * slotSymbols.length)],
         slotSymbols[Math.floor(Math.random() * slotSymbols.length)],
-        slotSymbols[Math.floor(Math.random() * slotSymbols.length)]
-    ];
+        slotSymbols[Math.floor(Math.random() * slotSymbols.length)]    ];
     reels.forEach(function(r, i) { r.innerText = result[i]; });
     
     let win = 0, txt = '';
@@ -394,8 +390,7 @@ async function placeRouletteBet(choice) {
     const startTime = Date.now();
     
     const spinTimer = setInterval(function() {
-        const elapsed = Date.now() - startTime;
-        resultEl.innerText = Math.floor(Math.random() * 37);
+        const elapsed = Date.now() - startTime;        resultEl.innerText = Math.floor(Math.random() * 37);
         
         if (elapsed >= spinDuration) {
             clearInterval(spinTimer);
@@ -444,8 +439,7 @@ async function createPokerTable() {
     try {
         const res = await apiRequest('/poker/create', 'POST', { user_id: currentUser.id, bet: bet, max_players: maxPlayers });
         if (res.success) {
-            tg.showAlert('✅ Стол создан!\n💰 Ставка: ' + bet + '\n👥 Игроков: ' + maxPlayers);
-            closeGame('poker');
+            tg.showAlert('✅ Стол создан!\n💰 Ставка: ' + bet + '\n👥 Игроков: ' + maxPlayers);            closeGame('poker');
             await loadBalance();
         }
     } catch (e) { tg.showAlert('❌ Ошибка создания стола'); }
@@ -456,4 +450,12 @@ window.addEventListener('load', async function() {
     console.log('🚀 Приложение загружено');
     initUser();
     if (currentUser) {
-        console.log('👤 Загрузка данных для пользовате
+        console.log('👤 Загрузка данных для пользователя:', currentUser.id);
+        try {
+            await Promise.all([loadBalance(), loadStats(), loadTop(), loadGames(), loadCatalog()]);
+            console.log('✅ Все данные успешно загружены');
+        } catch (e) {
+            console.error('❌ Критическая ошибка при загрузке:', e);
+        }
+    }
+});
