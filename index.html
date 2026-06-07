@@ -21,7 +21,7 @@
         </div>
         <div class="balance-box">
             <span class="balance-label">Баланс:</span>
-            <span class="balance-value" id="header-balance">0 💰</span>
+            <span class="balance-value" id="header-balance">Загрузка...</span>
         </div>
     </header>
 
@@ -82,7 +82,7 @@
                     <div class="avatar-placeholder-large">?</div>
                 </div>
                 <div class="profile-name" id="profile-nickname">Загрузка...</div>
-                <div class="profile-balance" id="profile-balance">0 💰</div>
+                <div class="profile-balance" id="profile-balance">Загрузка...</div>
                 <div class="profile-stats">
                     <div class="stat-item">
                         <span class="stat-label">Место в топе</span>
@@ -96,7 +96,8 @@
                         <span class="stat-label">Выиграно</span>
                         <span class="stat-value" id="stat-won">-</span>
                     </div>
-                </div>            </div>
+                </div>
+            </div>
         </div>
 
         <!-- === ИГРОВЫЕ ЭКРАНЫ === -->
@@ -145,8 +146,8 @@
             <div class="game-controls">
                 <div class="form-group">
                     <label>Ставка:</label>
-                    <input type="number" id="slots-bet" value="10" min="10"
-                        >                </div>
+                    <input type="number" id="slots-bet" value="10" min="10">
+                </div>
                 <button class="action-btn" onclick="spinSlots()">Крутить</button>
             </div>
             <div id="slots-message" class="game-message"></div>
@@ -231,6 +232,7 @@
         </button>
     </nav>
 
-    <script src="script.js"></script>
+    <!-- ВАЖНО: Убедись, что имя файла совпадает с твоим скриптом -->
+    <script src="script (4).js"></script>
 </body>
 </html>
