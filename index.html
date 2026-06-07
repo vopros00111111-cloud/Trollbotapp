@@ -205,24 +205,110 @@
             </div>
         </div>
 
-        <!-- Экран игры -->
+        <!-- Экран игры в покер -->
         <div id="poker-game-screen" class="game-section">
             <div class="game-header">
                 <button class="back-btn" onclick="closeGame('poker')">← Назад</button>
-                <h2>🃏 Игровой стол</h2>
+                <h2>🃏 Покерный стол</h2>
             </div>
     
-            <div class="poker-table">
-                <div class="pot-info" id="poker-game-status"> Игра идёт...</div>
-                <div style="margin: 10px 0; color: #c4b5fd;" id="poker-game-table-id"></div>
-                <div class="community-cards" id="poker-game-community"></div>
-                <div style="margin: 20px 0;">
-                    <h4 style="color:#a78bfa;">Игроки:</h4>
-                    <div id="poker-game-players" style="color: #c4b5fd;"></div>
+            <div class="poker-game-container">
+                <!-- Оппоненты сверху -->
+                <div class="opponents-top">
+                    <div class="opponent-seat seat-2" id="opponent-2">
+                        <div class="player-avatar" id="opp2-avatar">?</div>
+                        <div class="player-nick" id="opp2-nick">-</div>
+                        <div class="player-action" id="opp2-action"></div>
+                    </div>
+                    <div class="opponent-seat seat-1" id="opponent-1">
+                        <div class="player-avatar" id="opp1-avatar">?</div>
+                        <div class="player-nick" id="opp1-nick">-</div>
+                        <div class="player-action" id="opp1-action"></div>
+                    </div>
+                    <div class="opponent-seat seat-3" id="opponent-3">
+                        <div class="player-avatar" id="opp3-avatar">?</div>
+                        <div class="player-nick" id="opp3-nick">-</div>
+                        <div class="player-action" id="opp3-action"></div>
+                    </div>
                 </div>
-                <div class="poker-controls">
-                    <button class="action-btn" onclick="alert('Функция в разработке')">Колл</button>
-                    <button class="action-btn" onclick="closeGame('poker')">Покинуть стол</button>
+        
+                <!-- Игровой стол -->
+                <div class="poker-table-area">
+                    <div class="pot-display">
+                        <div class="pot-label">🏦 Банк:</div>
+                        <div class="pot-amount" id="poker-pot">0 💰</div>
+                    </div>
+                    <div class="current-bet-display">
+                        Ставка: <span id="current-bet">0</span> 💰
+                    </div>
+                    <div class="community-cards" id="community-cards">
+                        <div class="card-placeholder">🂠</div>
+                        <div class="card-placeholder">🂠</div>
+                        <div class="card-placeholder">🂠</div>
+                        <div class="card-placeholder">🂠</div>
+                        <div class="card-placeholder">🂠</div>
+                    </div>
+                </div>
+        
+        <!-- Карты игрока -->
+                <div class="my-cards-area">
+                    <div class="cards-label">🃏 Твои карты:</div>
+                    <div class="my-cards" id="my-cards">
+                        <div class="card back">🂠</div>
+                        <div class="card back">🂠</div>
+                    </div>
+                </div>
+        
+                <!-- Панель управления -->
+                <div class="poker-controls-area">
+                    <div class="control-left">
+                        <button class="control-btn raise-btn" onclick="showRaiseModal()">
+                            📈 Повысить
+                        </button>
+                    </div>
+                    <div class="control-center">
+                        <div class="my-avatar-small" id="my-avatar-small">?</div>
+                        <div class="my-nick-small" id="my-nick-small">Вы</div>
+                    </div>
+                    <div class="control-right">
+                        <button class="control-btn call-btn" onclick="pokerCall()">
+                            ✅ Колл
+                        </button>
+                        <button class="control-btn fold-btn" onclick="pokerFold()">
+                            ❌ Фолд
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Модальное окно повышения ставки -->
+        <div id="raise-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>📈 Повышение ставки</h3>
+                    <button class="modal-close" onclick="closeRaiseModal()">×</button>
+                </div>
+                <div class="modal-body">
+                    <div class="raise-amount-display">
+                        Текущая ставка: <span id="modal-current-bet">0</span> 💰
+                    </div>
+                    <div class="raise-input-group">
+                        <label>На сколько повысить:</label>
+                        <input type="number" id="raise-amount" min="10" step="10" value="10">
+                    </div>
+                    <div class="quick-raises">
+                        <button class="quick-btn" onclick="setRaiseAmount(20)">+20</button>
+                        <button class="quick-btn" onclick="setRaiseAmount(50)">+50</button>
+                        <button class="quick-btn" onclick="setRaiseAmount(100)">+100</button>
+                        <button class="quick-btn" onclick="setRaiseAmount(500)">+500</button>
+                    </div>
+                    <div class="total-raise-display">
+                        Итого: <span id="total-raise">0</span> 💰            </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="modal-btn cancel-btn" onclick="closeRaiseModal()">Отмена</button>
+                    <button class="modal-btn confirm-btn" onclick="confirmRaise()">Повысить</button>
                 </div>
             </div>
         </div>
