@@ -432,6 +432,56 @@ async function createPokerTable() {
         tg.showAlert('❌ Ошибка создания стола: ' + e.message);
     }
 }
+// === ПРОВЕРКА URL НА НАЛИЧИЕ TABLE_ID ===
+async function checkUrlForTable() {
+    const params = new URLSearchParams(window.location.search);
+    const tableId = params.get('table');
+    
+    if (tableId) {
+        console.log('🎯 Найден ID стола в URL:', tableId);
+        
+        // Ждём инициализации пользователя
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        if (!currentUser) {
+            tg.showAlert('❌ Ошибка: пользователь не авторизован');
+            return;
+        }
+        
+        // Пытаемся присоединиться
+        try {
+            const res = await apiRequest('/poker/join', 'POST', { 
+                user_id: currentUser.id, 
+                table_id: tableId 
+            });
+            
+            if (res.success) {
+                tg.showAlert('✅ Вы присоединились к столу!');
+                await loadBalance();
+                
+                if (res.game_started) {
+                    // Игра началась
+                    openPokerGame(tableId);
+                } else {
+                    // Ждём остальных
+                    document.getElementById('poker-game-status').innerText = '⏳ Ожидание игроков...';
+                    document.getElementById('poker-game-table-id').innerText = 'Стол: ' + tableId;
+                }
+            }
+        } catch (e) {
+            tg.showAlert('❌ Не удалось присоединиться: ' + e.message);
+        }
+    }
+}
+
+function openPokerGame(tableId) {
+    document.querySelectorAll('.tab-content, .game-section').forEach(t => t.classList.remove('active'));
+    document.getElementById('poker-game-screen').classList.add('active');
+    document.querySelector('.bottom-nav').classList.add('hidden');
+    
+    document.getElementById('poker-game-status').innerText = '🎮 Игра идёт!';
+    document.getElementById('poker-game-table-id').innerText = 'Стол: ' + tableId;
+        }
 // === ПОКЕР: СПИСОК СТОЛОВ ===
 async function loadPokerTables() {
     try {
@@ -478,68 +528,16 @@ function renderPokerTables(tables) {
     }
 }
 
-// === АВТОПРИСОЕДИНЕНИЕ ПО URL ===
-async function checkUrlForTable() {
-    const params = new URLSearchParams(window.location.search);
-    const tableId = params.get('table');
-    
-    if (tableId) {
-        console.log('🎯 Найден ID стола в URL:', tableId);
-        
-        // Открываем экран покера
-        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-        document.getElementById('poker-lobby-screen').classList.add('active');
-        document.querySelector('.bottom-nav').classList.add('hidden');
-        
-        // Ждём инициализации пользователя и баланса
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        // Пытаемся присоединиться
-        try {
-            const res = await apiRequest('/poker/join', 'POST', { 
-                user_id: currentUser.id, 
-                table_id: tableId 
-            });
-            
-            if (res.success) {
-                tg.showAlert('✅ Вы присоединились к столу!');
-                await loadBalance();
-                
-                if (res.game_started) {
-                    // Игра началась
-                    openPokerGame(tableId);
-                } else {
-                    // Ждём игроков
-                    loadPokerTables();
-                }
-            }
-        } catch (e) {
-            tg.showAlert('❌ Не удалось присоединиться: ' + e.message);
-            loadPokerTables();
-        }
-    } else {
-        // Если параметра table нет — просто загружаем список столов
-        loadPokerTables();
-    }
-}
 
-function openPokerGame(tableId) {
-    document.querySelectorAll('.tab-content, .game-section').forEach(t => t.classList.remove('active'));
-    document.getElementById('poker-game-screen').classList.add('active');
-    document.querySelector('.bottom-nav').classList.add('hidden');
-    
-    // Показываем состояние игры
-    document.getElementById('poker-game-status').innerText = ' Игра идёт...';
-    document.getElementById('poker-game-table-id').innerText = 'Стол: ' + tableId;
-        }
 // === ЗАПУСК ПРИЛОЖЕНИЯ ===
+
 window.addEventListener('load', async function() {
     console.log('🚀 Приложение загружено');
     initUser();
     if (currentUser) {
         await Promise.all([loadBalance(), loadStats(), loadTop(), loadGames(), loadCatalog()]);
         
-        // Проверяем, есть ли ID стола в URL
+        // 🔹 Проверяем, есть ли ID стола в URL
         await checkUrlForTable();
     }
     console.log('✅ Все данные загружены');
