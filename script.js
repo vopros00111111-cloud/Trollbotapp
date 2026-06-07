@@ -192,9 +192,8 @@ function openGame(gameName) {
     document.querySelectorAll('.game-section').forEach(function(t) { t.classList.remove('active'); });
     
     if (gameName === 'poker') {
-        // Для покера открываем лобби со списком столов
         document.getElementById('poker-lobby-screen').classList.add('active');
-        loadPokerTables(); // Загружаем список столов
+        loadPokerTables();
     } else {
         document.getElementById('game-' + gameName).classList.add('active');
     }
