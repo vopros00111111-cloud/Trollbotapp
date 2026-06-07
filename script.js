@@ -384,14 +384,39 @@ async function createPokerTable() {
     const maxPlayers = parseInt(document.getElementById('poker-players').value);
     if (!bet || bet < 100) { tg.showAlert('❌ Мин. ставка: 100'); return; }
     if (bet > currentBalance) { tg.showAlert('❌ Недостаточно монет'); return; }
+
+    // 🔹 Получаем chat_id из initData или URL
+    let chatId = 0;
     try {
-        const res = await apiRequest('/poker/create', 'POST', { user_id: currentUser.id, bet: bet, max_players: maxPlayers });
+        const initData = tg.initDataUnsafe;
+        // Telegram передаёт chat в initData.chat при открытии из группы
+        if (initData && initData.chat) {
+            chatId = initData.chat.id;
+        }
+        // Фолбэк: парсим из URL параметров
+        if (chatId === 0) {
+            const params = new URLSearchParams(window.location.search);
+            chatId = parseInt(params.get('tgWebAppChatId')) || 0;
+        }
+    } catch (e) {
+        console.warn('Не удалось получить chat_id:', e);
+    }
+
+    try {
+        const res = await apiRequest('/poker/create', 'POST', {
+            user_id: currentUser.id,
+            bet: bet,
+            max_players: maxPlayers,
+            chat_id: chatId  // 🔹 Отправляем на сервер
+        });
         if (res.success) {
             tg.showAlert('✅ Стол создан!\n💰 Ставка: ' + bet + '\n👥 Игроков: ' + maxPlayers);
             closeGame('poker');
             await loadBalance();
         }
-    } catch (e) { tg.showAlert('❌ Ошибка создания стола: ' + e.message); }
+    } catch (e) {
+        tg.showAlert('❌ Ошибка создания стола: ' + e.message);
+    }
 }
 
 // === ЗАПУСК ПРИЛОЖЕНИЯ ===
