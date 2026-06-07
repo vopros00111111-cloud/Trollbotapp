@@ -189,14 +189,28 @@ function switchTab(tabName) {
 
 function openGame(gameName) {
     document.querySelectorAll('.tab-content').forEach(function(t) { t.classList.remove('active'); });
-    document.getElementById('game-' + gameName).classList.add('active');
+    document.querySelectorAll('.game-section').forEach(function(t) { t.classList.remove('active'); });
+    
+    if (gameName === 'poker') {
+        // Для покера открываем лобби со списком столов
+        document.getElementById('poker-lobby-screen').classList.add('active');
+        loadPokerTables(); // Загружаем список столов
+    } else {
+        document.getElementById('game-' + gameName).classList.add('active');
+    }
+    
     document.querySelector('.bottom-nav').classList.add('hidden');
 }
 
 function closeGame(gameName) {
-    document.getElementById('game-' + gameName).classList.remove('active');
+    document.querySelectorAll('.game-section').forEach(function(t) { t.classList.remove('active'); });
     document.getElementById('tab-games').classList.add('active');
     document.querySelector('.bottom-nav').classList.remove('hidden');
+    
+    // Очищаем URL-параметры
+    if (window.history.replaceState) {
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
 }
 
 // === ПЕРЕВОДЫ ===
@@ -418,18 +432,115 @@ async function createPokerTable() {
         tg.showAlert('❌ Ошибка создания стола: ' + e.message);
     }
 }
+// === ПОКЕР: СПИСОК СТОЛОВ ===
+async function loadPokerTables() {
+    try {
+        const tables = await apiRequest('/poker/tables', 'GET');
+        renderPokerTables(tables);
+    } catch (e) {
+        console.error('Ошибка загрузки столов:', e);
+        document.getElementById('poker-tables-list').innerHTML = 
+            '<div style="text-align:center;padding:20px;color:#888;">Ошибка загрузки</div>';
+    }
+}
 
+function renderPokerTables(tables) {
+    const container = document.getElementById('poker-tables-list');
+    container.innerHTML = '';
+    
+    if (!tables || tables.length === 0) {
+        container.innerHTML = '<div style="text-align:center;padding:20px;color:#888;">Нет активных столов</div>';
+        return;
+    }
+    
+    for (let i = 0; i < tables.length; i++) {
+        const table = tables[i];
+        const card = document.createElement('div');
+        card.className = 'poker-table-card';
+        card.style.cssText = 'background:linear-gradient(135deg,#2a2d5a,#1e2145);border-radius:16px;padding:15px;border:2px solid #3d4080;margin-bottom:10px;';
+        
+        const isFull = table.players >= table.max_players;
+        card.innerHTML = `
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+                <div>
+                    <div style="font-size:16px;font-weight:700;color:#e0e7ff;">💰 Ставка: ${table.bet} 💰</div>
+                    <div style="font-size:14px;color:#c4b5fd;">👥 ${table.players}/${table.max_players} игроков</div>
+                    <div style="font-size:12px;color:#9ca3af;">👤 @${table.host_username}</div>
+                </div>
+                <button class="action-btn" style="width:auto;padding:10px 20px;" 
+                    onclick="joinPokerTable('${table.table_id}')" 
+                    ${isFull ? 'disabled style="opacity:0.5;"' : ''}>
+                    ${isFull ? 'Полон' : 'Сесть'}
+                </button>
+            </div>
+        `;
+        container.appendChild(card);
+    }
+}
+
+// === АВТОПРИСОЕДИНЕНИЕ ПО URL ===
+async function checkUrlForTable() {
+    const params = new URLSearchParams(window.location.search);
+    const tableId = params.get('table');
+    
+    if (tableId) {
+        console.log('🎯 Найден ID стола в URL:', tableId);
+        
+        // Открываем экран покера
+        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+        document.getElementById('poker-lobby-screen').classList.add('active');
+        document.querySelector('.bottom-nav').classList.add('hidden');
+        
+        // Ждём инициализации пользователя и баланса
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        // Пытаемся присоединиться
+        try {
+            const res = await apiRequest('/poker/join', 'POST', { 
+                user_id: currentUser.id, 
+                table_id: tableId 
+            });
+            
+            if (res.success) {
+                tg.showAlert('✅ Вы присоединились к столу!');
+                await loadBalance();
+                
+                if (res.game_started) {
+                    // Игра началась
+                    openPokerGame(tableId);
+                } else {
+                    // Ждём игроков
+                    loadPokerTables();
+                }
+            }
+        } catch (e) {
+            tg.showAlert('❌ Не удалось присоединиться: ' + e.message);
+            loadPokerTables();
+        }
+    } else {
+        // Если параметра table нет — просто загружаем список столов
+        loadPokerTables();
+    }
+}
+
+function openPokerGame(tableId) {
+    document.querySelectorAll('.tab-content, .game-section').forEach(t => t.classList.remove('active'));
+    document.getElementById('poker-game-screen').classList.add('active');
+    document.querySelector('.bottom-nav').classList.add('hidden');
+    
+    // Показываем состояние игры
+    document.getElementById('poker-game-status').innerText = ' Игра идёт...';
+    document.getElementById('poker-game-table-id').innerText = 'Стол: ' + tableId;
+        }
 // === ЗАПУСК ПРИЛОЖЕНИЯ ===
 window.addEventListener('load', async function() {
     console.log('🚀 Приложение загружено');
     initUser();
     if (currentUser) {
-        console.log('👤 Загрузка данных для пользователя:', currentUser.id);
-        try {
-            await Promise.all([loadBalance(), loadStats(), loadTop(), loadGames(), loadCatalog()]);
-            console.log('✅ Все данные успешно загружены');
-        } catch (e) {
-            console.error('❌ Критическая ошибка при загрузке:', e);
-        }
+        await Promise.all([loadBalance(), loadStats(), loadTop(), loadGames(), loadCatalog()]);
+        
+        // Проверяем, есть ли ID стола в URL
+        await checkUrlForTable();
     }
+    console.log('✅ Все данные загружены');
 });
