@@ -8,6 +8,7 @@ tg.setBackgroundColor('#1a1a2e');
 let currentUser = null;
 let currentBalance = 0;
 
+// === ИНИЦИАЛИЗАЦИЯ ПОЛЬЗОВАТЕЛЯ ===
 function initUser() {
     const initData = tg.initDataUnsafe;
     const user = initData ? initData.user : null;
@@ -37,6 +38,7 @@ function initUser() {
     }
 }
 
+// === БАЗОВЫЙ ЗАПРОС К API ===
 async function apiRequest(endpoint, method, data) {
     method = method || 'GET';
     const options = { method: method, headers: { 'Content-Type': 'application/json' } };
@@ -45,10 +47,13 @@ async function apiRequest(endpoint, method, data) {
     }
     const response = await fetch(API_URL + endpoint, options);
     if (!response.ok) {
-        throw new Error('HTTP error! status: ' + response.status);
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.error || 'HTTP error! status: ' + response.status);
     }
-    return await response.json();}
+    return await response.json();
+}
 
+// === ЗАГРУЗКА ДАННЫХ ===
 async function loadBalance() {
     try {
         const data = await apiRequest('/balance/' + currentUser.id);
@@ -92,11 +97,11 @@ async function loadGames() {
         renderGames(games);
     } catch (error) {
         console.error('Ошибка игр:', error);
-        document.getElementById('games-list').innerHTML = '<div style="text-align:center;padding:20px;color:#888;">Ошибка загрузки</div>';
-    }
+        document.getElementById('games-list').innerHTML = '<div style="text-align:center;padding:20px;color:#888;">Ошибка загрузки</div>';    }
 }
 
-async function loadCatalog() {    try {
+async function loadCatalog() {
+    try {
         const items = await apiRequest('/catalog');
         renderCatalog(items);
     } catch (error) {
@@ -105,6 +110,7 @@ async function loadCatalog() {    try {
     }
 }
 
+// === РЕНДЕРИНГ СПИСКОВ ===
 function renderTop(topList) {
     const container = document.getElementById('top-list');
     container.innerHTML = '';
@@ -140,11 +146,11 @@ function renderGames(games) {
             btnHtml = '<button class="game-action-btn" onclick="openGame(\'' + game.id + '\')">Играть</button>';
         } else {
             btnHtml = '<button class="game-action-btn">Играть</button>';
-        }
-        card.innerHTML = '<div class="game-icon">' + game.icon + '</div><h3>' + game.name + '</h3><p>' + game.description + '</p>' + btnHtml;
+        }        card.innerHTML = '<div class="game-icon">' + game.icon + '</div><h3>' + game.name + '</h3><p>' + game.description + '</p>' + btnHtml;
         container.appendChild(card);
     }
 }
+
 function renderCatalog(items) {
     const container = document.getElementById('catalog-list');
     container.innerHTML = '';
@@ -161,6 +167,7 @@ function renderCatalog(items) {
     }
 }
 
+// === НАВИГАЦИЯ ===
 document.querySelectorAll('.nav-btn').forEach(function(btn) {
     btn.addEventListener('click', function() {
         document.querySelectorAll('.nav-btn').forEach(function(b) { b.classList.remove('active'); });
@@ -192,6 +199,7 @@ function closeGame(gameName) {
     document.querySelector('.bottom-nav').classList.remove('hidden');
 }
 
+// === ПЕРЕВОДЫ ===
 async function sendTransfer() {
     const to = document.getElementById('transfer-to').value.trim();
     const amount = parseInt(document.getElementById('transfer-amount').value);
@@ -211,32 +219,8 @@ async function sendTransfer() {
     }
 }
 
-// === БЛЭКДЖЕК ===
-let bjGame = { deck: [], playerHand: [], dealerHand: [], bet: 0, gameOver: false };
-
-function createDeck() {
-    const suits = ['♠️', '♥️', '♦️', '♣️'];
-    const ranks = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
-    const deck = [];
-    for (let s = 0; s < suits.length; s++) {
-        for (let r = 0; r < ranks.length; r++) {
-            let value = parseInt(ranks[r]);
-            if (['J', 'Q', 'K'].indexOf(ranks[r]) !== -1) value = 10;
-            if (ranks[r] === 'A') value = 11;
-            deck.push({ rank: ranks[r], suit: suits[s], value: value });
-        }
-    }
-    return deck.sort(function() { return Math.random() - 0.5; });
-}
-
-function calculateScore(hand) {
-    let score = 0;
-    for (let i = 0; i < hand.length; i++) { score += hand[i].value; }
-    let aces = 0;
-    for (let i = 0; i < hand.length; i++) { if (hand[i].rank === 'A') aces++; }
-    while (score > 21 && aces > 0) { score -= 10; aces--; }
-    return score;
-}
+// === БЕЗОПАСНЫЙ БЛЭКДЖЕК (ЛОГИКА НА PYTHON) ===
+let bjGameActive = false;
 
 function renderCard(card, hidden) {
     if (hidden) return '<div class="card hidden"></div>';
@@ -244,83 +228,66 @@ function renderCard(card, hidden) {
     return '<div class="card ' + (isRed ? 'red' : 'black') + '">' + card.rank + card.suit + '</div>';
 }
 
-function updateBlackjackUI() {    document.getElementById('player-cards').innerHTML = bjGame.playerHand.map(function(c) { return renderCard(c); }).join('');
-    const dealerHidden = bjGame.dealerHand.length === 2 && !bjGame.gameOver;
-    document.getElementById('dealer-cards').innerHTML = bjGame.dealerHand.map(function(c, i) { return renderCard(c, i === 1 && dealerHidden); }).join('');
-    document.getElementById('player-score').innerText = calculateScore(bjGame.playerHand);
-    document.getElementById('dealer-score').innerText = dealerHidden ? '?' : calculateScore(bjGame.dealerHand);
+function updateBlackjackUI(res) {
+    document.getElementById('player-cards').innerHTML = res.player_hand.map(function(c) { return renderCard(c); }).join('');
+    
+    let dealerHtml = '';
+    if (!res.finished && res.dealer_card) {
+        dealerHtml = renderCard(res.dealer_card) + '<div class="card hidden"></div>';
+        document.getElementById('dealer-score').innerText = '?';
+    } else if (res.dealer_hand) {
+        dealerHtml = res.dealer_hand.map(function(c) { return renderCard(c); }).join('');
+        document.getElementById('dealer-score').innerText = res.dealer_score;
+    }
+    document.getElementById('dealer-cards').innerHTML = dealerHtml;
+    document.getElementById('player-score').innerText = res.player_score;
+    
+    const m = document.getElementById('bj-message');
+    if (res.finished) {
+        m.innerText = res.message || '';
+        m.className = 'game-message ' + (res.win > 0 ? 'win' : (res.message.includes('Ничья') ? 'draw' : 'lose'));
+        document.getElementById('play-controls').style.display = 'none';
+        document.getElementById('bet-controls').style.display = 'block';
+        currentBalance = res.balance;
+        document.getElementById('header-balance').innerText = currentBalance + ' 💰';
+        document.getElementById('profile-balance').innerText = currentBalance + ' 💰';
+    }
 }
 
 async function startBlackjack() {
     const bet = parseInt(document.getElementById('bj-bet').value);
     if (!bet || bet < 10) { tg.showAlert('❌ Мин. ставка: 10'); return; }
     if (bet > currentBalance) { tg.showAlert('❌ Недостаточно монет'); return; }
-    try { await apiRequest('/game-bet', 'POST', { user_id: currentUser.id, amount: bet, game: 'blackjack' }); }
-    catch (e) { tg.showAlert('❌ Ошибка ставки'); return; }
     
-    bjGame.bet = bet;
-    bjGame.deck = createDeck();
-    bjGame.playerHand = [bjGame.deck.pop(), bjGame.deck.pop()];
-    bjGame.dealerHand = [bjGame.deck.pop(), bjGame.deck.pop()];
-    bjGame.gameOver = false;
-    
-    document.getElementById('bet-controls').style.display = 'none';
-    document.getElementById('play-controls').style.display = 'flex';
-    document.getElementById('bj-message').innerText = '';
-    document.getElementById('bj-message').className = 'game-message';
-    updateBlackjackUI();
-    
-    if (calculateScore(bjGame.playerHand) === 21) { setTimeout(stand, 500); }
+    try {
+        const res = await apiRequest('/game/blackjack/start', 'POST', { user_id: currentUser.id, amount: bet });
+        bjGameActive = true;
+        document.getElementById('bet-controls').style.display = 'none';
+        document.getElementById('play-controls').style.display = 'flex';
+        document.getElementById('bj-message').innerText = '';
+        updateBlackjackUI(res);
+    } catch (e) { tg.showAlert('❌ Ошибка: ' + e.message); }
 }
 
 async function hit() {
-    if (bjGame.gameOver) return;
-    bjGame.playerHand.push(bjGame.deck.pop());
-    updateBlackjackUI();
-    if (calculateScore(bjGame.playerHand) > 21) {
-        bjGame.gameOver = true;
-        document.getElementById('play-controls').style.display = 'none';
-        document.getElementById('bet-controls').style.display = 'block';
-        const m = document.getElementById('bj-message');
-        m.innerText = '❌ Перебор! Вы проиграли.';
-        m.className = 'game-message lose';
-        updateBlackjackUI();
-        await loadBalance();
-    }
+    if (!bjGameActive) return;
+    try {
+        const res = await apiRequest('/game/blackjack/hit', 'POST', { user_id: currentUser.id });
+        updateBlackjackUI(res);
+        if (res.finished) bjGameActive = false;
+    } catch (e) { tg.showAlert('❌ Ошибка'); }
 }
 
 async function stand() {
-    if (bjGame.gameOver) return;
-    bjGame.gameOver = true;
-    while (calculateScore(bjGame.dealerHand) < 17) {
-        bjGame.dealerHand.push(bjGame.deck.pop());
-        await new Promise(function(r) { setTimeout(r, 500); });
-        updateBlackjackUI();
-    }
-    const ps = calculateScore(bjGame.playerHand);
-    const ds = calculateScore(bjGame.dealerHand);
-    document.getElementById('play-controls').style.display = 'none';
-    document.getElementById('bet-controls').style.display = 'block';
-    const m = document.getElementById('bj-message');
-    
-    if (ds > 21 || ps > ds) {
-        const win = bjGame.bet * 2;
-        try { await apiRequest('/game-win', 'POST', { user_id: currentUser.id, amount: win, game: 'blackjack' }); } catch (e) {}
-        m.innerText = '🎉 Вы выиграли ' + win + ' монет!';
-        m.className = 'game-message win';
-    } else if (ps === ds) {
-        try { await apiRequest('/game-win', 'POST', { user_id: currentUser.id, amount: bjGame.bet, game: 'blackjack_draw' }); } catch (e) {}
-        m.innerText = '🤝 Ничья! Ставка возвращена.';
-        m.className = 'game-message draw';
-    } else {
-        m.innerText = '😔 Дилер выиграл!';
-        m.className = 'game-message lose';
-    }
-    updateBlackjackUI();
-    await loadBalance();
+    if (!bjGameActive) return;
+    try {
+        const res = await apiRequest('/game/blackjack/stand', 'POST', { user_id: currentUser.id });
+        updateBlackjackUI(res);
+        bjGameActive = false;
+    } catch (e) { tg.showAlert('❌ Ошибка'); }
 }
 
-// === СЛОТЫ ===
+// === БЕЗОПАСНЫЕ СЛОТЫ (ЛОГИКА НА PYTHON) ===
 const slotSymbols = ['🍒', '🍋', '🍊', '🍇', '💎', '7️⃣', '🔔'];
 
 async function spinSlots() {
@@ -328,45 +295,35 @@ async function spinSlots() {
     if (!bet || bet < 10) { tg.showAlert('❌ Мин. ставка: 10'); return; }
     if (bet > currentBalance) { tg.showAlert('❌ Недостаточно монет'); return; }
     
-    try { await apiRequest('/game-bet', 'POST', { user_id: currentUser.id, amount: bet, game: 'slots' }); }
-    catch (e) { tg.showAlert('❌ Ошибка ставки'); return; }
-    
     const reels = [document.getElementById('reel1'), document.getElementById('reel2'), document.getElementById('reel3')];
     const msg = document.getElementById('slots-message');
     msg.innerText = 'Крутим...';
     
+    // Визуальная анимация
     for (let i = 0; i < 10; i++) {
         reels.forEach(function(r) { r.innerText = slotSymbols[Math.floor(Math.random() * slotSymbols.length)]; });
         await new Promise(function(r) { setTimeout(r, 100); });
     }
     
-    const result = [
-        slotSymbols[Math.floor(Math.random() * slotSymbols.length)],
-        slotSymbols[Math.floor(Math.random() * slotSymbols.length)],
-        slotSymbols[Math.floor(Math.random() * slotSymbols.length)]
-    ];
-    reels.forEach(function(r, i) { r.innerText = result[i]; });
-    
-    let win = 0, txt = '';
-    if (result[0] === result[1] && result[1] === result[2]) {
-        if (result[0] === '7️⃣') { win = bet * 50; txt = '🎉 ДЖЕКПОТ 777! +' + win; }
-        else { win = bet * 10; txt = '✨ ТРИ В РЯД! +' + win; }
-    } else if (result[0] === result[1] || result[1] === result[2] || result[0] === result[2]) {
-        win = bet * 2; txt = '✅ Два совпадения! +' + win;
-    } else { 
-        txt = '😔 Не повезло!'; 
+    try {
+        const res = await apiRequest('/game/slots', 'POST', { user_id: currentUser.id, amount: bet });
+        
+        // Показываем РЕАЛЬНЫЙ результат с сервера
+        reels.forEach(function(r, i) { r.innerText = res.result[i]; });
+        
+        currentBalance = res.balance;
+        document.getElementById('header-balance').innerText = currentBalance + ' 💰';
+        document.getElementById('profile-balance').innerText = currentBalance + ' 💰';
+        
+        msg.className = res.win > 0 ? 'game-message win' : 'game-message lose';
+        msg.innerText = res.win > 0 ? '🎉 Выигрыш: +' + res.win + ' монет!' : '😔 Не повезло!';
+    } catch (e) {
+        msg.innerText = '❌ Ошибка: ' + e.message;
+        msg.className = 'game-message lose';
     }
-    
-    msg.className = win > 0 ? 'game-message win' : 'game-message lose';
-    msg.innerText = txt;
-    
-    if (win > 0) { 
-        try { await apiRequest('/game-win', 'POST', { user_id: currentUser.id, amount: win, game: 'slots' }); } catch (e) {} 
-    }
-    await loadBalance();
 }
 
-// === РУЛЕТКА ===
+// === БЕЗОПАСНАЯ РУЛЕТКА (ЛОГИКА НА PYTHON) ===
 async function placeRouletteBet(choice) {
     const bet = parseInt(document.getElementById('roulette-bet').value);
     if (!bet || bet < 10) { tg.showAlert('❌ Мин. ставка: 10'); return; }
@@ -378,9 +335,6 @@ async function placeRouletteBet(choice) {
         if (isNaN(betNumber) || betNumber < 0 || betNumber > 36) { tg.showAlert('❌ Число от 0 до 36'); return; }
     }
     
-    try { await apiRequest('/game-bet', 'POST', { user_id: currentUser.id, amount: bet, game: 'roulette' }); }
-    catch (e) { tg.showAlert('❌ Ошибка ставки'); return; }
-    
     const resultEl = document.getElementById('roulette-result');
     const msgEl = document.getElementById('roulette-message');
     msgEl.innerText = '';
@@ -388,53 +342,43 @@ async function placeRouletteBet(choice) {
     resultEl.classList.remove('red', 'black', 'green');
     resultEl.classList.add('spinning');
     
-    const spinDuration = 2000;
-    const spinInterval = 80;
+    // Анимация вращения
     const startTime = Date.now();
-    
     const spinTimer = setInterval(function() {
-        const elapsed = Date.now() - startTime;
-        resultEl.innerText = Math.floor(Math.random() * 37);
+        resultEl.innerText = Math.floor(Math.random() * 37); 
+        if (Date.now() - startTime >= 2000) clearInterval(spinTimer);
+    }, 80);
+    
+    try {
+        const res = await apiRequest('/game/roulette', 'POST', { 
+            user_id: currentUser.id, amount: bet, choice: choice, bet_number: betNumber 
+        });
         
-        if (elapsed >= spinDuration) {
-            clearInterval(spinTimer);
-            const number = Math.floor(Math.random() * 37);
-            resultEl.innerText = number;
-            resultEl.classList.remove('spinning');
-            
-            let color;
-            if (number === 0) color = 'green';
-            else if ([1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36].indexOf(number) !== -1) color = 'red';
-            else color = 'black';
-            
-            resultEl.classList.add(color);
-            let winAmount = 0, message = '';
-            
-            if (choice === 'number' && betNumber === number) {
-                winAmount = bet * 36;
-                message = '🎉 Выпало ' + number + '! Вы выиграли ' + winAmount + ' монет!';
-            } else if (choice === color) {
-                const multiplier = color === 'green' ? 14 : 2;
-                winAmount = bet * multiplier;
-                const colorName = color === 'red' ? 'красное' : color === 'black' ? 'чёрное' : 'зелёное';
-                message = '🎉 Выпало ' + number + ' (' + colorName + ')! Вы выиграли ' + winAmount + ' монет!';
-            } else {
-                const colorName = color === 'red' ? 'красное' : color === 'black' ? 'чёрное' : 'зелёное';
-                message = '😔 Выпало ' + number + ' (' + colorName + '). Вы проиграли.';
-            }
-            
-            msgEl.className = winAmount > 0 ? 'game-message win' : 'game-message lose';
-            msgEl.innerText = message;
-            
-            if (winAmount > 0) { 
-                try { await apiRequest('/game-win', 'POST', { user_id: currentUser.id, amount: winAmount, game: 'roulette' }); } catch (e) {} 
-            }
-            await loadBalance();
-        }
-    }, spinInterval);
+        // Ждем окончания анимации
+        await new Promise(function(r) { setTimeout(r, 2000); });
+        
+        resultEl.innerText = res.number;
+        resultEl.classList.remove('spinning');
+        resultEl.classList.add(res.color);
+        
+        currentBalance = res.balance;
+        document.getElementById('header-balance').innerText = currentBalance + ' 💰';
+        document.getElementById('profile-balance').innerText = currentBalance + ' 💰';
+        
+        const colorName = res.color === 'red' ? 'красное' : res.color === 'black' ? 'чёрное' : 'зелёное';
+        msgEl.className = res.win > 0 ? 'game-message win' : 'game-message lose';
+        msgEl.innerText = res.win > 0 
+            ? '🎉 Выпало ' + res.number + ' (' + colorName + ')! +' + res.win + ' монет!' 
+            : '😔 Выпало ' + res.number + ' (' + colorName + '). Проигрыш.';
+    } catch (e) {
+        clearInterval(spinTimer);
+        resultEl.classList.remove('spinning');
+        msgEl.innerText = '❌ Ошибка: ' + e.message;
+        msgEl.className = 'game-message lose';
+    }
 }
 
-// === ПОКЕР ===
+// === ПОКЕР (СОЗДАНИЕ СТОЛА) ===
 async function createPokerTable() {
     const bet = parseInt(document.getElementById('poker-bet').value);
     const maxPlayers = parseInt(document.getElementById('poker-players').value);
@@ -447,10 +391,10 @@ async function createPokerTable() {
             closeGame('poker');
             await loadBalance();
         }
-    } catch (e) { tg.showAlert('❌ Ошибка создания стола'); }
+    } catch (e) { tg.showAlert('❌ Ошибка создания стола: ' + e.message); }
 }
 
-// Запуск при загрузке
+// === ЗАПУСК ПРИЛОЖЕНИЯ ===
 window.addEventListener('load', async function() {
     console.log('🚀 Приложение загружено');
     initUser();
