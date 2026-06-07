@@ -194,7 +194,8 @@ function closeGame(gameName) {
 
 async function sendTransfer() {
     const to = document.getElementById('transfer-to').value.trim();
-    const amount = parseInt(document.getElementById('transfer-amount').value);    const comment = document.getElementById('transfer-comment').value.trim();
+    const amount = parseInt(document.getElementById('transfer-amount').value);
+    const comment = document.getElementById('transfer-comment').value.trim();
     if (!to) { tg.showAlert('❌ Введите получателя'); return; }
     if (!amount || amount <= 0) { tg.showAlert('❌ Введите сумму'); return; }
     if (amount > currentBalance) { tg.showAlert('❌ Недостаточно монет'); return; }
@@ -292,7 +293,8 @@ async function stand() {
     if (bjGame.gameOver) return;
     bjGame.gameOver = true;
     while (calculateScore(bjGame.dealerHand) < 17) {
-        bjGame.dealerHand.push(bjGame.deck.pop());        await new Promise(function(r) { setTimeout(r, 500); });
+        bjGame.dealerHand.push(bjGame.deck.pop());
+        await new Promise(function(r) { setTimeout(r, 500); });
         updateBlackjackUI();
     }
     const ps = calculateScore(bjGame.playerHand);
@@ -341,7 +343,8 @@ async function spinSlots() {
     const result = [
         slotSymbols[Math.floor(Math.random() * slotSymbols.length)],
         slotSymbols[Math.floor(Math.random() * slotSymbols.length)],
-        slotSymbols[Math.floor(Math.random() * slotSymbols.length)]    ];
+        slotSymbols[Math.floor(Math.random() * slotSymbols.length)]
+    ];
     reels.forEach(function(r, i) { r.innerText = result[i]; });
     
     let win = 0, txt = '';
@@ -390,7 +393,8 @@ async function placeRouletteBet(choice) {
     const startTime = Date.now();
     
     const spinTimer = setInterval(function() {
-        const elapsed = Date.now() - startTime;        resultEl.innerText = Math.floor(Math.random() * 37);
+        const elapsed = Date.now() - startTime;
+        resultEl.innerText = Math.floor(Math.random() * 37);
         
         if (elapsed >= spinDuration) {
             clearInterval(spinTimer);
@@ -439,7 +443,8 @@ async function createPokerTable() {
     try {
         const res = await apiRequest('/poker/create', 'POST', { user_id: currentUser.id, bet: bet, max_players: maxPlayers });
         if (res.success) {
-            tg.showAlert('✅ Стол создан!\n💰 Ставка: ' + bet + '\n👥 Игроков: ' + maxPlayers);            closeGame('poker');
+            tg.showAlert('✅ Стол создан!\n💰 Ставка: ' + bet + '\n👥 Игроков: ' + maxPlayers);
+            closeGame('poker');
             await loadBalance();
         }
     } catch (e) { tg.showAlert('❌ Ошибка создания стола'); }
