@@ -202,11 +202,12 @@ function openGame(gameName) {
 }
 
 function closeGame(gameName) {
+    stopTablePolling(); //  Останавливаем опрос стола
+    
     document.querySelectorAll('.game-section').forEach(function(t) { t.classList.remove('active'); });
     document.getElementById('tab-games').classList.add('active');
     document.querySelector('.bottom-nav').classList.remove('hidden');
     
-    // Очищаем URL-параметры
     if (window.history.replaceState) {
         window.history.replaceState({}, document.title, window.location.pathname);
     }
@@ -687,7 +688,7 @@ async function checkUrlForTable() {
             tg.showAlert(' Не удалось присоединиться: ' + e.message);
         }
     }
-    }
+}
 // === ЗАПУСК ПРИЛОЖЕНИЯ ===
 
 window.addEventListener('load', async function() {
