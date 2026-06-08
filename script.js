@@ -397,40 +397,190 @@ async function createPokerTable() {
     const maxPlayers = parseInt(document.getElementById('poker-players').value);
     if (!bet || bet < 100) { tg.showAlert('❌ Мин. ставка: 100'); return; }
     if (bet > currentBalance) { tg.showAlert('❌ Недостаточно монет'); return; }
-
-    // 🔹 Получаем chat_id из initData или URL
-    let chatId = 0;
+    
     try {
-        const initData = tg.initDataUnsafe;
-        // Telegram передаёт chat в initData.chat при открытии из группы
-        if (initData && initData.chat) {
-            chatId = initData.chat.id;
-        }
-        // Фолбэк: парсим из URL параметров
-        if (chatId === 0) {
-            const params = new URLSearchParams(window.location.search);
-            chatId = parseInt(params.get('tgWebAppChatId')) || 0;
-        }
-    } catch (e) {
-        console.warn('Не удалось получить chat_id:', e);
-    }
-
-    try {
-        const res = await apiRequest('/poker/create', 'POST', {
-            user_id: currentUser.id,
-            bet: bet,
-            max_players: maxPlayers,
-            chat_id: chatId  // 🔹 Отправляем на сервер
+        const res = await apiRequest('/poker/create', 'POST', { 
+            user_id: currentUser.id, 
+            bet: bet, 
+            max_players: maxPlayers 
         });
+        
         if (res.success) {
             tg.showAlert('✅ Стол создан!\n💰 Ставка: ' + bet + '\n👥 Игроков: ' + maxPlayers);
-            closeGame('poker');
+            
+            // 🔹 СРАЗУ ОТКРЫВАЕМ СТОЛ ДЛЯ СОЗДАТЕЛЯ
+            openPokerGame(res.table_id);
+            
+            // Запускаем периодическую проверку игроков
+            startTablePolling(res.table_id);
+            
+            await loadBalance();
+        }
+    } catch (e) { 
+        tg.showAlert('❌ Ошибка создания стола: ' + e.message); 
+    }
+}
+
+// === ПОКЕР: ПРИСОЕДИНЕНИЕ К СТОЛУ ===
+async function joinPokerTable(tableId) {
+    try {
+        const res = await apiRequest('/poker/join', 'POST', { 
+            user_id: currentUser.id, 
+            table_id: tableId 
+        });
+        
+        if (res.success) {
+            tg.showAlert('✅ Вы присоединились к столу!');
+            
+            // 🔹 СРАЗУ ОТКРЫВАЕМ СТОЛ
+            openPokerGame(tableId);
+            
+            // Запускаем проверку состояния
+            startTablePolling(tableId);
+            
             await loadBalance();
         }
     } catch (e) {
-        tg.showAlert('❌ Ошибка создания стола: ' + e.message);
+        tg.showAlert('❌ Ошибка присоединения: ' + e.message); 
     }
 }
+
+// === ПОКЕР: ОТКРЫТИЕ СТОЛА ===
+function openPokerGame(tableId) {
+    document.querySelectorAll('.tab-content, .game-section').forEach(t => t.classList.remove('active'));
+    document.getElementById('poker-game-screen').classList.add('active');
+    document.querySelector('.bottom-nav').classList.add('hidden');
+    
+    window.currentPokerTableId = tableId;
+    
+    document.getElementById('poker-game-status').innerText = '⏳ Ожидание игроков...';
+    document.getElementById('poker-game-table-id').innerText = 'Стол: ' + tableId;
+    document.getElementById('poker-pot').innerText = 'Загрузка...';
+    document.getElementById('poker-game-players').innerText = '';
+    
+    loadPokerGameState(tableId);
+}
+
+// === ПОКЕР: ПЕРИОДИЧЕСКАЯ ПРОВЕРКА СТОЛА ===
+let tablePollingInterval = null;
+
+function startTablePolling(tableId) {
+    if (tablePollingInterval) {
+        clearInterval(tablePollingInterval);
+    }
+    
+    tablePollingInterval = setInterval(async () => {
+        try {
+            const state = await apiRequest(`/poker/table/${tableId}`, 'GET');
+            updatePokerTableUI(state);
+            
+            if (state.status === 'started' || state.status === 'playing') {
+                clearInterval(tablePollingInterval);
+                document.getElementById('poker-game-status').innerText = '🎮 Игра идёт!';
+            }
+        } catch (e) {
+            console.error('Ошибка проверки стола:', e);
+        }
+    }, 3000);
+}
+
+function stopTablePolling() {
+    if (tablePollingInterval) {
+        clearInterval(tablePollingInterval);
+        tablePollingInterval = null;
+    }
+}
+function updatePokerTableUI(state) {
+    document.getElementById('poker-pot').innerText = (state.pot || 0) + ' 💰';
+    
+    if (state.status === 'waiting') {
+        const playerCount = state.players ? state.players.length : 1;
+        const maxPlayers = state.max_players || 2;
+        document.getElementById('poker-game-status').innerText = 
+            '⏳ Ожидание игроков... (' + playerCount + '/' + maxPlayers + ')';
+    }
+    
+    if (state.players && state.players.length > 0) {
+        const playersHtml = state.players.map(function(p, i) {
+            const isHost = p.user_id === state.host;
+            const marker = isHost ? '👑 ' : '▪️ ';
+            return marker + (i + 1) + '. @' + (p.username || 'Player');
+        }).join('\n');
+        
+        document.getElementById('poker-game-players').innerText = playersHtml;
+    }
+}
+
+// === ПОКЕР: ЗАГРУЗКА СОСТОЯНИЯ СТОЛА (ИСПРАВЛЕНА) ===
+async function loadPokerGameState(tableId) {
+    try {
+        const state = await apiRequest('/poker/table/' + tableId, 'GET');
+        
+        document.getElementById('poker-pot').innerText = (state.pot || 0) + ' 💰';
+        updateCurrentBet(state.current_bet || 0);
+        
+        // Общие карты
+        const communityContainer = document.getElementById('community-cards');
+        communityContainer.innerHTML = '';
+        if (state.community_cards && state.community_cards.length > 0) {
+            state.community_cards.forEach(function(card) {
+                const cardEl = document.createElement('div');
+                cardEl.className = 'card revealed';
+                cardEl.innerText = card.rank + card.suit;
+                communityContainer.appendChild(cardEl);
+            });
+        } else {
+            for (let i = 0; i < 5; i++) {
+                const placeholder = document.createElement('div');
+                placeholder.className = 'card-placeholder';
+                placeholder.innerText = '🂠';
+                communityContainer.appendChild(placeholder);
+            }
+        }
+        
+        // Карты игрока
+        const myCardsContainer = document.getElementById('my-cards');
+        myCardsContainer.innerHTML = '';
+        if (state.my_cards && state.my_cards.length > 0) {
+            state.my_cards.forEach(function(card) {
+                const cardEl = document.createElement('div');
+                cardEl.className = 'card revealed';
+                cardEl.innerText = card.rank + card.suit;
+                myCardsContainer.appendChild(cardEl);
+            });
+        } else {
+            for (let i = 0; i < 2; i++) {
+                const cardBack = document.createElement('div');
+                cardBack.className = 'card back';
+                cardBack.innerText = '🂠';
+                myCardsContainer.appendChild(cardBack);
+            }
+        }
+        
+        // Оппоненты
+        if (state.players) {
+            state.players.forEach(function(player, index) {
+                if (player.user_id !== currentUser.id) {
+                    const oppIndex = index < 2 ? index + 1 : index;
+                    const nickEl = document.getElementById('opp' + oppIndex + '-nick');
+                    const avatarEl = document.getElementById('opp' + oppIndex + '-avatar');
+                    if (nickEl) nickEl.innerText = '@' + player.username;
+                    if (avatarEl) avatarEl.innerText = player.username ? player.username.charAt(0).toUpperCase() : '?';
+                }
+            });
+        }
+        
+        // Аватар текущего игрока
+        const myAvatar = document.getElementById('my-avatar-small');
+        const myNick = document.getElementById('my-nick-small');
+        if (myAvatar) myAvatar.innerText = currentUser.username ? currentUser.username.charAt(0).toUpperCase() : '?';
+        if (myNick) myNick.innerText = currentUser.username || 'Вы';
+        
+    } catch (e) {
+        console.error('Ошибка загрузки состояния:', e);
+    }
+}
+
 // === ПОКЕР: МОДАЛЬНОЕ ОКНО ПОВЫШЕНИЯ ===
 let currentBet = 0;
 let raiseAmount = 0;
@@ -439,8 +589,7 @@ function showRaiseModal() {
     document.getElementById('modal-current-bet').innerText = currentBet;
     document.getElementById('raise-amount').value = 10;
     updateTotalRaise();
-    document.getElementById('raise-modal').classList.add('active');
-}
+    document.getElementById('raise-modal').classList.add('active');}
 
 function closeRaiseModal() {
     document.getElementById('raise-modal').classList.remove('active');
@@ -468,7 +617,6 @@ function confirmRaise() {
         return;
     }
     
-    // Отправляем повышение на сервер
     pokerRaise(raiseAmount);
     closeRaiseModal();
 }
@@ -476,124 +624,47 @@ function confirmRaise() {
 // === ПОКЕР: ДЕЙСТВИЯ ===
 async function pokerCall() {
     try {
-        // Здесь будет логика колла
         tg.showAlert('✅ Колл! (в разработке)');
     } catch (e) {
         tg.showAlert('❌ Ошибка: ' + e.message);
-    }}
+    }
+}
 
 async function pokerFold() {
     try {
-        // Здесь будет логика фолда
         tg.showAlert('❌ Фолд! (в разработке)');
     } catch (e) {
         tg.showAlert('❌ Ошибка: ' + e.message);
     }
 }
 
-async function pokerRaise(amount) {
-    try {
-        // Здесь будет логика повышения
-        tg.showAlert(`📈 Повышение до ${amount} монет! (в разработке)`);
+async function pokerRaise(amount) {    try {
+        tg.showAlert('📈 Повышение до ' + amount + ' монет! (в разработке)');
     } catch (e) {
         tg.showAlert('❌ Ошибка: ' + e.message);
     }
 }
 
-// Обновление текущей ставки
 function updateCurrentBet(amount) {
     currentBet = amount;
     document.getElementById('current-bet').innerText = amount;
 }
 
-// Загрузка состояния стола
-async function loadPokerGameState(tableId) {
-    try {
-        const state = await apiRequest(`/poker/table/${tableId}`, 'GET');
-        
-        // Обновляем банк
-        document.getElementById('poker-pot').innerText = state.pot + ' 💰';
-        
-        // Обновляем текущую ставку
-        updateCurrentBet(state.current_bet || 0);
-        
-        // Обновляем общие карты
-        const communityContainer = document.getElementById('community-cards');
-        communityContainer.innerHTML = '';
-        if (state.community_cards && state.community_cards.length > 0) {
-            state.community_cards.forEach(card => {
-                const cardEl = document.createElement('div');
-                cardEl.className = 'card revealed';
-                cardEl.innerText = card.rank + card.suit;
-                communityContainer.appendChild(cardEl);
-            });
-        } else {
-            // Пустые слоты
-            for (let i = 0; i < 5; i++) {
-                const placeholder = document.createElement('div');
-                placeholder.className = 'card-placeholder';
-                placeholder.innerText = '🂠';
-                communityContainer.appendChild(placeholder);
-            }
-        }
-        
-        // Обновляем карты игрока
-        const myCardsContainer = document.getElementById('my-cards');
-        myCardsContainer.innerHTML = '';
-        if (state.my_cards && state.my_cards.length > 0) {
-            state.my_cards.forEach(card => {
-                const cardEl = document.createElement('div');
-                cardEl.className = 'card revealed';
-                cardEl.innerText = card.rank + card.suit;
-                myCardsContainer.appendChild(cardEl);
-            });
-        } else {
-            // Рубашки карт
-            for (let i = 0; i < 2; i++) {
-                const cardBack = document.createElement('div');
-                cardBack.className = 'card back';
-                cardBack.innerText = '🂠';
-                myCardsContainer.appendChild(cardBack);
-            }
-        }
-        
-        // Обновляем информацию об оппонентах
-        if (state.players) {
-            state.players.forEach((player, index) => {
-                if (player.user_id !== currentUser.id) {
-                    const oppIndex = index < 2 ? index + 1 : index;
-                    document.getElementById(`opp${oppIndex}-nick`).innerText = '@' + player.username;
-                    document.getElementById(`opp${oppIndex}-avatar`).innerText = player.username.charAt(0).toUpperCase();
-                }
-            });
-        }
-        
-        // Обновляем аватар текущего игрока
-        document.getElementById('my-avatar-small').innerText = currentUser.username ? 
-            currentUser.username.charAt(0).toUpperCase() : '?';
-        document.getElementById('my-nick-small').innerText = currentUser.username || 'Вы';
-        
-    } catch (e) {
-        console.error('Ошибка загрузки состояния:', e);
-    }
-}
 // === ПРОВЕРКА URL НА НАЛИЧИЕ TABLE_ID ===
 async function checkUrlForTable() {
     const params = new URLSearchParams(window.location.search);
     const tableId = params.get('table');
     
     if (tableId) {
-        console.log('🎯 Найден ID стола в URL:', tableId);
+        console.log(' Найден ID стола в URL:', tableId);
         
-        // Ждём инициализации пользователя
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise(function(resolve) { setTimeout(resolve, 1000); });
         
         if (!currentUser) {
-            tg.showAlert('❌ Ошибка: пользователь не авторизован');
+            tg.showAlert(' Ошибка: пользователь не авторизован');
             return;
         }
         
-        // Пытаемся присоединиться
         try {
             const res = await apiRequest('/poker/join', 'POST', { 
                 user_id: currentUser.id, 
@@ -605,75 +676,18 @@ async function checkUrlForTable() {
                 await loadBalance();
                 
                 if (res.game_started) {
-                    // Игра началась
                     openPokerGame(tableId);
                 } else {
-                    // Ждём остальных
-                    document.getElementById('poker-game-status').innerText = '⏳ Ожидание игроков...';
+                    document.getElementById('poker-game-status').innerText = ' Ожидание игроков...';
                     document.getElementById('poker-game-table-id').innerText = 'Стол: ' + tableId;
+                    startTablePolling(tableId);
                 }
             }
         } catch (e) {
-            tg.showAlert('❌ Не удалось присоединиться: ' + e.message);
+            tg.showAlert(' Не удалось присоединиться: ' + e.message);
         }
     }
-}
-
-function openPokerGame(tableId) {
-    document.querySelectorAll('.tab-content, .game-section').forEach(t => t.classList.remove('active'));
-    document.getElementById('poker-game-screen').classList.add('active');
-    document.querySelector('.bottom-nav').classList.add('hidden');
-    
-    document.getElementById('poker-game-status').innerText = '🎮 Игра идёт!';
-    document.getElementById('poker-game-table-id').innerText = 'Стол: ' + tableId;
-        }
-// === ПОКЕР: СПИСОК СТОЛОВ ===
-async function loadPokerTables() {
-    try {
-        const tables = await apiRequest('/poker/tables', 'GET');
-        renderPokerTables(tables);
-    } catch (e) {
-        console.error('Ошибка загрузки столов:', e);
-        document.getElementById('poker-tables-list').innerHTML = 
-            '<div style="text-align:center;padding:20px;color:#888;">Ошибка загрузки</div>';
     }
-}
-
-function renderPokerTables(tables) {
-    const container = document.getElementById('poker-tables-list');
-    container.innerHTML = '';
-    
-    if (!tables || tables.length === 0) {
-        container.innerHTML = '<div style="text-align:center;padding:20px;color:#888;">Нет активных столов</div>';
-        return;
-    }
-    
-    for (let i = 0; i < tables.length; i++) {
-        const table = tables[i];
-        const card = document.createElement('div');
-        card.className = 'poker-table-card';
-        card.style.cssText = 'background:linear-gradient(135deg,#2a2d5a,#1e2145);border-radius:16px;padding:15px;border:2px solid #3d4080;margin-bottom:10px;';
-        
-        const isFull = table.players >= table.max_players;
-        card.innerHTML = `
-            <div style="display:flex;justify-content:space-between;align-items:center;">
-                <div>
-                    <div style="font-size:16px;font-weight:700;color:#e0e7ff;">💰 Ставка: ${table.bet} 💰</div>
-                    <div style="font-size:14px;color:#c4b5fd;">👥 ${table.players}/${table.max_players} игроков</div>
-                    <div style="font-size:12px;color:#9ca3af;">👤 @${table.host_username}</div>
-                </div>
-                <button class="action-btn" style="width:auto;padding:10px 20px;" 
-                    onclick="joinPokerTable('${table.table_id}')" 
-                    ${isFull ? 'disabled style="opacity:0.5;"' : ''}>
-                    ${isFull ? 'Полон' : 'Сесть'}
-                </button>
-            </div>
-        `;
-        container.appendChild(card);
-    }
-}
-
-
 // === ЗАПУСК ПРИЛОЖЕНИЯ ===
 
 window.addEventListener('load', async function() {
