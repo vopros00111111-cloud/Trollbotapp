@@ -192,7 +192,7 @@ function openGame(gameName) {
     document.querySelectorAll('.game-section').forEach(function(t) { t.classList.remove('active'); });
     
     if (gameName === 'poker') {
-        document.getElementById('game-poker').classList.add('active');  // ← СТАЛО
+        ocument.getElementById('poker-lobby-screen').classList.add('active');  // ← БЫЛО
         loadPokerTables();
     } else {
         document.getElementById('game-' + gameName).classList.add('active');
