@@ -1,8 +1,6 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
-    <script>eruda.init();</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>BlessCoin</title>
@@ -23,11 +21,12 @@
         </div>
         <div class="balance-box">
             <span class="balance-label">Баланс:</span>
-            <span class="balance-value" id="header-balance">Загрузка...</span>
+            <span class="balance-value" id="header-balance">0 💰</span>
         </div>
     </header>
 
     <main>
+        <!-- Главная -->
         <div id="tab-home" class="tab-content active">
             <h1 class="page-title">Главная</h1>
             <div class="main-layout">
@@ -38,22 +37,24 @@
                 <div class="menu-buttons-container">
                     <button class="menu-btn" onclick="switchTab('games')">🎮 Игры</button>
                     <button class="menu-btn" onclick="switchTab('transfer')">💸 Переводы</button>
-                    <button class="menu-btn" onclick="switchTab('profile')">👤 Профиль</button>
                     <button class="menu-btn" onclick="switchTab('catalog')">📦 Каталог</button>
+                    <button class="menu-btn" onclick="switchTab('profile')">👤 Профиль</button>
                 </div>
             </div>
         </div>
 
+        <!-- Игры -->
         <div id="tab-games" class="tab-content">
             <h1 class="page-title">Игры:</h1>
             <div class="games-grid" id="games-list">Загрузка...</div>
         </div>
-
+        <!-- Каталог -->
         <div id="tab-catalog" class="tab-content">
             <h1 class="page-title">Каталог:</h1>
             <div class="catalog-grid" id="catalog-list">Загрузка...</div>
         </div>
 
+        <!-- Переводы -->
         <div id="tab-transfer" class="tab-content">
             <h1 class="page-title">Переводы:</h1>
             <div class="transfer-form">
@@ -73,6 +74,7 @@
             </div>
         </div>
 
+        <!-- Профиль -->
         <div id="tab-profile" class="tab-content">
             <div class="profile-card">
                 <div class="profile-avatar-wrapper" id="profile-avatar-wrapper">
@@ -80,7 +82,7 @@
                     <div class="avatar-placeholder-large">?</div>
                 </div>
                 <div class="profile-name" id="profile-nickname">Загрузка...</div>
-                <div class="profile-balance" id="profile-balance">Загрузка...</div>
+                <div class="profile-balance" id="profile-balance">0 💰</div>
                 <div class="profile-stats">
                     <div class="stat-item">
                         <span class="stat-label">Место в топе</span>
@@ -98,7 +100,7 @@
             </div>
         </div>
 
-        <!-- ИГРОВЫЕ ЭКРАНЫ -->
+        <!-- Блэкджек -->
         <div id="game-blackjack" class="game-section">
             <div class="game-header">
                 <button class="back-btn" onclick="closeGame('blackjack')">← Назад</button>
@@ -128,6 +130,7 @@
             <div id="bj-message" class="game-message"></div>
         </div>
 
+        <!-- Слоты -->
         <div id="game-slots" class="game-section">
             <div class="game-header">
                 <button class="back-btn" onclick="closeGame('slots')">← Назад</button>
@@ -136,7 +139,7 @@
             <div class="slots-machine">
                 <div class="reel" id="reel1">🍒</div>
                 <div class="reel" id="reel2">🍒</div>
-                <div class="reel" id="reel3">🍒</div>
+                <div class="reel" id="reel3"></div>
             </div>
             <div class="game-controls">
                 <div class="form-group">
@@ -148,6 +151,7 @@
             <div id="slots-message" class="game-message"></div>
         </div>
 
+        <!-- Рулетка -->
         <div id="game-roulette" class="game-section">
             <div class="game-header">
                 <button class="back-btn" onclick="closeGame('roulette')">← Назад</button>
@@ -175,13 +179,13 @@
             <div id="roulette-message" class="game-message"></div>
         </div>
 
-        <!-- Лобби покера (список столов) -->
+        <!-- Покер: Лобби -->
         <div id="poker-lobby-screen" class="game-section">
             <div class="game-header">
                 <button class="back-btn" onclick="closeGame('poker')">← Назад</button>
                 <h2>🃏 Покер</h2>
             </div>
-    
+            
             <div class="transfer-form" style="margin-bottom: 20px;">
                 <h3 style="color:#a78bfa;margin-bottom:10px;">Создать новый стол</h3>
                 <div class="form-group">
@@ -198,40 +202,40 @@
                 </div>
                 <button class="action-btn" onclick="createPokerTable()">Создать стол</button>
             </div>
-    
+            
             <h3 style="color:#a78bfa;margin-bottom:10px;">Активные столы</h3>
             <div id="poker-tables-list" style="display: flex; flex-direction: column; gap: 10px;">
                 Загрузка...
             </div>
         </div>
 
-        <!-- Экран игры в покер -->
+        <!-- Покер: Игровой стол -->
         <div id="poker-game-screen" class="game-section">
             <div class="game-header">
                 <button class="back-btn" onclick="closeGame('poker')">← Назад</button>
-                <h2>🃏 Покерный стол</h2>
+                <h2> Покерный стол</h2>
             </div>
-    
+            
             <div class="poker-game-container">
                 <!-- Оппоненты сверху -->
                 <div class="opponents-top">
-                    <div class="opponent-seat seat-2" id="opponent-2">
-                        <div class="player-avatar" id="opp2-avatar">?</div>
-                        <div class="player-nick" id="opp2-nick">-</div>
-                        <div class="player-action" id="opp2-action"></div>
-                    </div>
-                    <div class="opponent-seat seat-1" id="opponent-1">
+                    <div class="opponent-seat" id="opponent-1">
                         <div class="player-avatar" id="opp1-avatar">?</div>
                         <div class="player-nick" id="opp1-nick">-</div>
                         <div class="player-action" id="opp1-action"></div>
                     </div>
-                    <div class="opponent-seat seat-3" id="opponent-3">
+                    <div class="opponent-seat" id="opponent-2">
+                        <div class="player-avatar" id="opp2-avatar">?</div>
+                        <div class="player-nick" id="opp2-nick">-</div>
+                        <div class="player-action" id="opp2-action"></div>
+                    </div>
+                    <div class="opponent-seat" id="opponent-3">
                         <div class="player-avatar" id="opp3-avatar">?</div>
                         <div class="player-nick" id="opp3-nick">-</div>
                         <div class="player-action" id="opp3-action"></div>
                     </div>
                 </div>
-        
+                
                 <!-- Игровой стол -->
                 <div class="poker-table-area">
                     <div class="pot-display">
@@ -242,41 +246,35 @@
                         Ставка: <span id="current-bet">0</span> 💰
                     </div>
                     <div class="community-cards" id="community-cards">
+                        <div class="card-placeholder"></div>
                         <div class="card-placeholder">🂠</div>
                         <div class="card-placeholder">🂠</div>
                         <div class="card-placeholder">🂠</div>
-                        <div class="card-placeholder">🂠</div>
-                        <div class="card-placeholder">🂠</div>
+                        <div class="card-placeholder"></div>
                     </div>
                 </div>
-        
-        <!-- Карты игрока -->
+                
+                <!-- Карты игрока -->
                 <div class="my-cards-area">
-                    <div class="cards-label">🃏 Твои карты:</div>
+                    <div class="cards-label"> Твои карты:</div>
                     <div class="my-cards" id="my-cards">
                         <div class="card back">🂠</div>
                         <div class="card back">🂠</div>
                     </div>
                 </div>
-        
+                
                 <!-- Панель управления -->
                 <div class="poker-controls-area">
                     <div class="control-left">
-                        <button class="control-btn raise-btn" onclick="showRaiseModal()">
-                            📈 Повысить
-                        </button>
+                        <button class="control-btn raise-btn" onclick="showRaiseModal()">📈 Повысить</button>
                     </div>
                     <div class="control-center">
                         <div class="my-avatar-small" id="my-avatar-small">?</div>
                         <div class="my-nick-small" id="my-nick-small">Вы</div>
                     </div>
                     <div class="control-right">
-                        <button class="control-btn call-btn" onclick="pokerCall()">
-                            ✅ Колл
-                        </button>
-                        <button class="control-btn fold-btn" onclick="pokerFold()">
-                            ❌ Фолд
-                        </button>
+                        <button class="control-btn call-btn" onclick="pokerCall()">✅ Колл</button>
+                        <button class="control-btn fold-btn" onclick="pokerFold()"> Фолд</button>
                     </div>
                 </div>
             </div>
@@ -304,7 +302,8 @@
                         <button class="quick-btn" onclick="setRaiseAmount(500)">+500</button>
                     </div>
                     <div class="total-raise-display">
-                        Итого: <span id="total-raise">0</span> 💰            </div>
+                        Итого: <span id="total-raise">0</span> 💰
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button class="modal-btn cancel-btn" onclick="closeRaiseModal()">Отмена</button>
