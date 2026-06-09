@@ -188,19 +188,32 @@ function switchTab(tabName) {
 }
 
 function openGame(gameName) {
-    document.querySelectorAll('.tab-content').forEach(function(t) { t.classList.remove('active'); });
-    document.querySelectorAll('.game-section').forEach(function(t) { t.classList.remove('active'); });
+    // Скрываем все вкладки и игровые экраны
+    document.querySelectorAll('.tab-content').forEach(function(t) { 
+        t.classList.remove('active'); 
+    });
+    document.querySelectorAll('.game-section').forEach(function(t) { 
+        t.classList.remove('active'); 
+    });
     
+    // Открываем нужный экран
     if (gameName === 'poker') {
-        ocument.getElementById('poker-lobby-screen').classList.add('active');  // ← БЫЛО
-        loadPokerTables();
+        // Для покера открываем лобби со списком столов
+        document.getElementById('poker-lobby-screen').classList.add('active');
+        loadPokerTables(); // Загружаем список активных столов
     } else {
-        document.getElementById('game-' + gameName).classList.add('active');
+        // Для остальных игр открываем стандартный экран
+        const gameScreen = document.getElementById('game-' + gameName);
+        if (gameScreen) {
+            gameScreen.classList.add('active');
+        } else {
+            console.error('Экран игры не найден: game-' + gameName);
+        }
     }
     
+    // Скрываем нижнюю навигацию
     document.querySelector('.bottom-nav').classList.add('hidden');
 }
-
 function closeGame(gameName) {
     stopTablePolling(); //  Останавливаем опрос стола
     
