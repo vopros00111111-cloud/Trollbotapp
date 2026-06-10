@@ -474,7 +474,8 @@ async function loadPokerGameState(tableId) {
         }
         
         if (state.players) {
-            let oppIndex = 2;            state.players.forEach(function(player) {
+            let oppIndex = 2;
+            state.players.forEach(function(player) {
                 if (player.user_id !== currentUser.id && oppIndex <= 4) {
                     const nickEl = document.getElementById('opp' + oppIndex + '-nick');
                     const avatarEl = document.getElementById('opp' + oppIndex + '-avatar');
@@ -487,7 +488,7 @@ async function loadPokerGameState(tableId) {
         
         const myAvatar = document.getElementById('my-avatar-small');
         const myNick = document.getElementById('my-nick-small');
-        if (myAvatar) myAvatar.innerText = currentUser.username ? currentUser.username.charAt(0).toUpperCase() : '?';
+        if (myAvatar) myAvatar.innerText = currentUser.username ? currentUser.username.charAt(0).toUpperCase() : '!';
         if (myNick) myNick.innerText = currentUser.username || 'Вы';
         
     } catch (e) {
