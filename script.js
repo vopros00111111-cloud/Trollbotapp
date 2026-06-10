@@ -463,77 +463,80 @@ function updatePokerTableUI(state) {
 }
 
 // === ПОКЕР: ЗАГРУЗКА СОСТОЯНИЯ СТОЛА ===
+// Загрузка состояния стола
 async function loadPokerGameState(tableId) {
-    try {
-        const state = await apiRequest(`/poker/table/${tableId}`, 'GET');
-        
-        // Обновляем банк
-        document.getElementById('poker-pot').innerText = state.pot + ' 💰';
-        
-        // Обновляем текущую ставку
-        updateCurrentBet(state.current_bet || 0);
-        
-        // Обновляем общие карты
-        const communityContainer = document.getElementById('community-cards');
-        communityContainer.innerHTML = '';
-        if (state.community_cards && state.community_cards.length > 0) {
-            state.community_cards.forEach(function(card) {
-                const cardEl = document.createElement('div');
-                cardEl.className = 'card revealed';
-                cardEl.innerText = card.rank + card.suit;
-                communityContainer.appendChild(cardEl);
-            });
-        } else {
-            for (let i = 0; i < 5; i++) {
-                const placeholder = document.createElement('div');
-                placeholder.className = 'card-placeholder';
-                placeholder.innerText = '🂠';
-                communityContainer.appendChild(placeholder);
-            }
+try {
+const state = await apiRequest(`/poker/table/${tableId}`, 'GET');
+    // Обновляем банк
+    document.getElementById('poker-pot').innerText = state.pot + ' 💰';
+    
+    // Обновляем текущую ставку
+    updateCurrentBet(state.current_bet || 0);
+     
+    // Обновляем общие карты
+    const communityContainer = document.getElementById('community-cards');
+    communityContainer.innerHTML = '';
+    if (state.community_cards && state.community_cards.length > 0) {
+        state.community_cards.forEach(function(card) {
+            const cardEl = document.createElement('div');
+            cardEl.className = 'card revealed';
+            cardEl.innerText = card.rank + card.suit;
+            communityContainer.appendChild(cardEl);
+        });
+    } else {
+        // Пустые слоты
+        for (let i = 0; i < 5; i++) {
+            const placeholder = document.createElement('div');
+            placeholder.className = 'card-placeholder';
+            placeholder.innerText = '🂠';
+            communityContainer.appendChild(placeholder);
         }
-        
-        // Обновляем карты игрока
-        const myCardsContainer = document.getElementById('my-cards');
-        myCardsContainer.innerHTML = '';
-        if (state.my_cards && state.my_cards.length > 0) {
-            state.my_cards.forEach(function(card) {
-                const cardEl = document.createElement('div');
-                cardEl.className = 'card revealed';
-                cardEl.innerText = card.rank + card.suit;
-                myCardsContainer.appendChild(cardEl);
-            });
-        } else {
-            for (let i = 0; i < 2; i++) {
-                const cardBack = document.createElement('div');
-                cardBack.className = 'card back';
-                cardBack.innerText = '';
-                myCardsContainer.appendChild(cardBack);
-            }
-        }
-        
-        // Обновляем информацию об оппонентах
-        if (state.players) {
-            let oppIndex = 1;
-            state.players.forEach(function(player) {
-                if (player.user_id !== currentUser.id && oppIndex <= 3) {
-                    const nickEl = document.getElementById('opp' + oppIndex + '-nick');
-                    const avatarEl = document.getElementById('opp' + oppIndex + '-avatar');
-                    if (nickEl) nickEl.innerText = '@' + player.username;
-                    if (avatarEl) avatarEl.innerText = player.username ? player.username.charAt(0).toUpperCase() : '?';
-                    oppIndex++;
-                }
-            });
-        }
-        
-        // Обновляем аватар текущего игрока
-        const myAvatar = document.getElementById('my-avatar-small');
-        const myNick = document.getElementById('my-nick-small');
-        if (myAvatar) myAvatar.innerText = currentUser.username ? currentUser.username.charAt(0).toUpperCase() : '?';
-        if (myNick) myNick.innerText = currentUser.username || 'Вы';
-        
-    } catch (e) {
-        console.error('Ошибка загрузки состояния:', e);
     }
+    
+    // Обновляем карты игрока
+    const myCardsContainer = document.getElementById('my-cards');
+    myCardsContainer.innerHTML = '';
+    if (state.my_cards && state.my_cards.length > 0) {
+        state.my_cards.forEach(function(card) {
+            const cardEl = document.createElement('div');
+            cardEl.className = 'card revealed';
+            cardEl.innerText = card.rank + card.suit;
+            myCardsContainer.appendChild(cardEl);
+        });
+    } else {
+        // Рубашки карт
+        for (let i = 0; i < 2; i++) {
+            const cardBack = document.createElement('div');
+            cardBack.className = 'card back';
+            cardBack.innerText = '🂠';
+            myCardsContainer.appendChild(cardBack);
+        }
+    }
+    
+    // Обновляем информацию об оппонентах
+    // Рассадка: ты(внизу), 2 участник(напротив/вверху), 3 участник(слева), 4 участник(справа)
+    if (state.players) {
+        let oppIndex = 2; // Начинаем с 2, так как 1 - это ты
+        state.players.forEach(function(player) {
+            if (player.user_id !== currentUser.id && oppIndex <= 4) {
+                const nickEl = document.getElementById('opp' + oppIndex + '-nick');
+                const avatarEl = document.getElementById('opp' + oppIndex + '-avatar');
+                if (nickEl) nickEl.innerText = '@' + player.username;
+                if (avatarEl) avatarEl.innerText = player.username ? player.username.charAt(0).toUpperCase() : '?';
+                oppIndex++;
+            }
+        });
+    }
+    
+    // Обновляем аватар текущего игрока (ты - внизу)
+    const myAvatar = document.getElementById('my-avatar-small');
+    const myNick = document.getElementById('my-nick-small');
+    if (myAvatar) myAvatar.innerText = currentUser.username ? currentUser.username.charAt(0).toUpperCase() : '?';
+    if (myNick) myNick.innerText = currentUser.username || 'Вы';
+    
+} catch (e) {
+    console.error('Ошибка загрузки состояния:', e);
+}
 }
 
 // === ПОКЕР: МОДАЛЬНОЕ ОКНО ПОВЫШЕНИЯ ===
