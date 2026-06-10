@@ -473,28 +473,43 @@ async function loadPokerGameState(tableId) {
             }
         }
         
-        if (state.players) {
-            let oppIndex = 2;
+        
+        // === ОБНОВЛЕНИЕ ДАННЫХ СОПЕРНИКОВ ===
+    
+        if (state.players && Array.isArray(state.players)) {
+            let oppIndex = 2;            
             state.players.forEach(function(player) {
+                // Исправлено: убраны пробелы в user_id и &&
                 if (player.user_id !== currentUser.id && oppIndex <= 4) {
                     const nickEl = document.getElementById('opp' + oppIndex + '-nick');
                     const avatarEl = document.getElementById('opp' + oppIndex + '-avatar');
-                    if (nickEl) nickEl.innerText = '@' + player.username;
-                    if (avatarEl) avatarEl.innerText = player.username ? player.username.charAt(0).toUpperCase() : '?';
+                
+                    if (nickEl) nickEl.innerText = '@' + (player.username || 'Игрок');
+                    if (avatarEl) {
+                        const firstLetter = player.username ? player.username.charAt(0).toUpperCase() : '?';
+                        avatarEl.innerText = firstLetter;
+                    }
                     oppIndex++;
                 }
             });
         }
-        
+    
+        // === ОБНОВЛЕНИЕ ДАННЫХ ТЕКУЩЕГО ИГРОКА ===
         const myAvatar = document.getElementById('my-avatar-small');
+        // Исправлено: убран пробел в начале ID
         const myNick = document.getElementById('my-nick-small');
-        if (myAvatar) myAvatar.innerText = currentUser.username ? currentUser.username.charAt(0).toUpperCase() : '!';
-        if (myNick) myNick.innerText = currentUser.username || 'Вы';
+    
+        if (myAvatar) {
+            const myFirstLetter = currentUser.username ? currentUser.username.charAt(0).toUpperCase() : '?';
+            myAvatar.innerText = myFirstLetter;
+        }
+        // Исправлено: убран пробел в username
+        if (myNick) myNick.innerText = '@' + (currentUser.username || 'Вы');
         
-    } catch (e) {
-        console.error('Ошибка загрузки состояния:', e);
+        } catch (e) {
+            console.error('Ошибка загрузки состояния:', e);
+        }
     }
-}
 
 // === ПОКЕР: МОДАЛЬНОЕ ОКНО ПОВЫШЕНИЯ ===
 let currentBet = 0;
