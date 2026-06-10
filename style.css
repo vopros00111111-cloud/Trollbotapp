@@ -605,92 +605,70 @@ body {
 }
 
 /* Панель управления */
-.poker-controls-area {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 10px;
-    padding: 10px;
-    background: linear-gradient(135deg, #2a2d5a, #1e2145);
-    border-radius: 16px;
+.poker-controls-area { 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    gap: 5px; 
+    padding: 8px; 
+    background: linear-gradient(135deg, #2a2d5a, #1e2145); 
+    border-radius: 16px; 
     border: 2px solid #3d4080;
+    flex-wrap: wrap;
 }
 
-.control-left, .control-right {
-    flex: 1;
-    display: flex;
-    gap: 8px;
+.control-left, .control-right { 
+    flex: 1; 
+    display: flex; 
+    gap: 5px; 
     justify-content: center;
+    min-width: 0;
 }
 
-.control-center {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 0 15px;
+.control-center { 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    padding: 0 5px;
+    flex-shrink: 0;
 }
 
-.my-avatar-small {
-    width: 45px;
-    height: 45px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #7c3aed, #5b21b6);
-    border: 3px solid #8b5cf6;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 22px;
-    font-weight: bold;
-    margin-bottom: 4px;
+.my-avatar-small { 
+    width: 40px; 
+    height: 40px; 
+    border-radius: 50%; 
+    background: linear-gradient(135deg, #7c3aed, #5b21b6); 
+    border: 3px solid #8b5cf6; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    font-size: 18px; 
+    font-weight: bold; 
+    margin-bottom: 2px;
 }
 
-.my-nick-small {
-    font-size: 12px;
-    font-weight: 600;
+.my-nick-small { 
+    font-size: 10px; 
+    font-weight: 600; 
     color: #e0e7ff;
 }
 
-.control-btn {
-    padding: 12px 16px;
-    border: none;
-    border-radius: 10px;
-    font-size: 13px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.2s;
+.control-btn { 
+    padding: 10px 12px; 
+    border: none; 
+    border-radius: 10px; 
+    font-size: 12px; 
+    font-weight: 700; 
+    cursor: pointer; 
+    transition: all 0.2s; 
     white-space: nowrap;
+    flex: 1;
+    max-width: 100px;
 }
 
-.raise-btn {
-    background: linear-gradient(135deg, #f59e0b, #d97706);
-    color: #fff;
-    box-shadow: 0 4px 12px rgba(245,158,11,0.3);
-}
-
-.raise-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(245,158,11,0.5);
-}
-
-.call-btn {
-    background: linear-gradient(135deg, #10b981, #059669);
-    color: #fff;
-    box-shadow: 0 4px 12px rgba(16,185,129,0.3);
-}
-
-.call-btn:hover {
-    transform: translateY(-2px);
-}
-
-.fold-btn {
-    background: linear-gradient(135deg, #ef4444, #dc2626);
-    color: #fff;
-    box-shadow: 0 4px 12px rgba(239,68,68,0.3);
-}
-
-.fold-btn:hover {
-    transform: translateY(-2px);
-}
+.raise-btn { background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff; }
+.call-btn { background: linear-gradient(135deg, #10b981, #059669); color: #fff; }
+.fold-btn { background: linear-gradient(135deg, #ef4444, #dc2626); color: #fff; }
 
 /* Модальное окно */
 .modal {
