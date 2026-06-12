@@ -201,6 +201,11 @@ function openGame(gameName) {
 }
 
 function closeGame(gameName) {
+    // Останавливаем обновление покера
+    if (pokerPollingInterval) {
+        clearInterval(pokerPollingInterval);
+        pokerPollingInterval = null;
+    }
     document.querySelectorAll('.game-section').forEach(function(t) { t.classList.remove('active'); });
     document.getElementById('tab-games').classList.add('active');
     document.querySelector('.bottom-nav').classList.remove('hidden');
@@ -421,12 +426,20 @@ async function joinPokerTable(tableId) {
 }
 
 // === ПОКЕР: ОТКРЫТИЕ СТОЛА ===
+let pokerPollingInterval = null;
+
 function openPokerGame(tableId) {
     document.querySelectorAll('.tab-content, .game-section').forEach(function(t) { t.classList.remove('active'); });
     document.getElementById('poker-game-screen').classList.add('active');
     document.querySelector('.bottom-nav').classList.add('hidden');
-    document.getElementById('poker-game-status').innerText = ' Ожидание игроков...';    document.getElementById('poker-game-table-id').innerText = 'Стол: ' + tableId;
+    document.getElementById('poker-game-status').innerText = '⏳ Ожидание игроков...';    document.getElementById('poker-game-table-id').innerText = 'Стол: ' + tableId;
     loadPokerGameState(tableId);
+    
+    // Авто-обновление каждые 3 секунды
+    if (pokerPollingInterval) clearInterval(pokerPollingInterval);
+    pokerPollingInterval = setInterval(function() {
+        loadPokerGameState(tableId);
+    }, 3000);
 }
 
 // === ПОКЕР: ЗАГРУЗКА СОСТОЯНИЯ СТОЛА ===
@@ -475,6 +488,13 @@ async function loadPokerGameState(tableId) {
         
         
         // === ОБНОВЛЕНИЕ ДАННЫХ СОПЕРНИКОВ ===
+        // Сброс всех слотов перед обновлением
+        for (let slot = 2; slot <= 4; slot++) {
+            const nickEl = document.getElementById('opp' + slot + '-nick');
+            const avatarEl = document.getElementById('opp' + slot + '-avatar');
+            if (nickEl) nickEl.innerText = 'Ожидание...';
+            if (avatarEl) avatarEl.innerText = '?';
+        }
     
         if (state.players && Array.isArray(state.players)) {
             let oppIndex = 2;            
@@ -492,6 +512,20 @@ async function loadPokerGameState(tableId) {
                     oppIndex++;
                 }
             });
+            
+            // Обновляем статус
+            const statusEl = document.getElementById('poker-game-status');
+            if (statusEl) {
+                if (state.status === 'started') {
+                    statusEl.innerText = '🃏 Игра идёт!';
+                    if (pokerPollingInterval) {
+                        clearInterval(pokerPollingInterval);
+                        pokerPollingInterval = null;
+                    }
+                } else {
+                    statusEl.innerText = '⏳ Игроков: ' + state.players.length + '/' + state.max_players;
+                }
+            }
         }
     
         // === ОБНОВЛЕНИЕ ДАННЫХ ТЕКУЩЕГО ИГРОКА ===
