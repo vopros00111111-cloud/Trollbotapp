@@ -474,7 +474,8 @@ async function loadPokerGameState(tableId) {
                     // Умная проверка: если карта объект {rank, suit} или просто строка
                     let rank = card.rank !== undefined ? card.rank : '';
                     let suit = card.suit !== undefined ? card.suit : card;
-                    cardEl.innerText = rank + suit;
+                    cardEl.innerText = (typeof card === 'string') ? card : ((card.rank || '') + (card.suit || ''));
+                    
                     
                     if (suit.includes('♥') || suit.includes('♦')) cardEl.style.color = '#ef4444';
                     communityContainer.appendChild(cardEl);
@@ -504,7 +505,8 @@ async function loadPokerGameState(tableId) {
                     
                     let rank = card.rank !== undefined ? card.rank : '';
                     let suit = card.suit !== undefined ? card.suit : card;
-                    cardEl.innerText = rank + suit;
+                    cardEl.innerText = (typeof card === 'string') ? card : ((card.rank || '') + (card.suit || ''));
+                    
                     
                     if (suit.includes('♥') || suit.includes('♦')) cardEl.style.color = '#ef4444';
                     myCardsContainer.appendChild(cardEl);
