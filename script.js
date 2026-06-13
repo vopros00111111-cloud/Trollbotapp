@@ -432,7 +432,8 @@ function openPokerGame(tableId) {
     document.querySelectorAll('.tab-content, .game-section').forEach(function(t) { t.classList.remove('active'); });
     document.getElementById('poker-game-screen').classList.add('active');
     document.querySelector('.bottom-nav').classList.add('hidden');
-    document.getElementById('poker-game-status').innerText = '⏳ Ожидание игроков...';    document.getElementById('poker-game-table-id').innerText = 'Стол: ' + tableId;
+    document.getElementById('poker-game-status').innerText = '⏳ Ожидание игроков...';
+    document.getElementById('poker-game-table-id').innerText = 'Стол: ' + tableId;
     loadPokerGameState(tableId);
     
     // Авто-обновление каждые 3 секунды
@@ -445,51 +446,80 @@ function openPokerGame(tableId) {
 // === ПОКЕР: ЗАГРУЗКА СОСТОЯНИЯ СТОЛА ===
 async function loadPokerGameState(tableId) {
     try {
+        // Передаем user_id параметром
         const state = await apiRequest('/poker/table/' + tableId + '?user_id=' + currentUser.id, 'GET');
         
+        // Защита: если сервер вернул пустой или некорректный ответ
+        if (!state) return;
+
+        // Обновляем банк (проверяем существование state.pot)
+        const potEl = document.getElementById('poker-pot');
+        if (potEl) {
+            potEl.innerText = (state.pot || 0) + ' 💰';
+        }
         
-        document.getElementById('poker-pot').innerText = state.pot + ' 💰';
-        updateCurrentBet(state.current_bet || 0);
+        if (typeof updateCurrentBet === 'function') {
+            updateCurrentBet(state.current_bet || 0);
+        }
         
+        // === ОБЩИЕ КАРТЫ НА СТОЛЕ ===
         const communityContainer = document.getElementById('community-cards');
-        communityContainer.innerHTML = '';
-        if (state.community_cards && state.community_cards.length > 0) {
-            state.community_cards.forEach(function(card) {
-                const cardEl = document.createElement('div');
-                cardEl.className = 'card revealed';
-                cardEl.innerText = card.rank + card.suit;
-                communityContainer.appendChild(cardEl);
-            });
-        } else {
-            for (let i = 0; i < 5; i++) {
-                const placeholder = document.createElement('div');
-                placeholder.className = 'card-placeholder';
-                placeholder.innerText = '🂠';
-                communityContainer.appendChild(placeholder);
+        if (communityContainer) {
+            communityContainer.innerHTML = '';
+            if (state.community_cards && state.community_cards.length > 0) {
+                state.community_cards.forEach(function(card) {
+                    if (!card) return;
+                    const cardEl = document.createElement('div');
+                    cardEl.className = 'card revealed';
+                    
+                    // Проверяем формат карты (объект или строка)
+                    const rank = card.rank !== undefined ? card.rank : '';
+                    const suit = card.suit !== undefined ? card.suit : card;
+                    cardEl.innerText = rank + suit;
+                    
+                    if (suit.includes('♥') || suit.includes('♦')) cardEl.style.color = '#ef4444';
+                    communityContainer.appendChild(cardEl);
+                });
+            } else {
+                // Если карт нет — рисуем рубашки
+                for (let i = 0; i < 5; i++) {
+                    const placeholder = document.createElement('div');
+                    placeholder.className = 'card-placeholder';
+                    placeholder.innerText = '🂠';
+                    communityContainer.appendChild(placeholder);
+                }
             }
         }
         
+        // === МОИ КАРМАННЫЕ КАРТЫ ===
         const myCardsContainer = document.getElementById('my-cards');
-        myCardsContainer.innerHTML = '';
-        if (state.my_cards && state.my_cards.length > 0) {
-            state.my_cards.forEach(function(card) {
-                const cardEl = document.createElement('div');
-                cardEl.className = 'card revealed';
-                cardEl.innerText = card.rank + card.suit;
-                myCardsContainer.appendChild(cardEl);
-            });
-        } else {
-            for (let i = 0; i < 2; i++) {
-                const cardBack = document.createElement('div');
-                cardBack.className = 'card back';
-                cardBack.innerText = '🂠';
-                myCardsContainer.appendChild(cardBack);
+        if (myCardsContainer) {
+            myCardsContainer.innerHTML = '';
+            if (state.my_cards && state.my_cards.length > 0) {
+                state.my_cards.forEach(function(card) {
+                    if (!card) return;
+                    const cardEl = document.createElement('div');
+                    cardEl.className = 'card revealed';
+                    
+                    const rank = card.rank !== undefined ? card.rank : '';
+                    const suit = card.suit !== undefined ? card.suit : card;
+                    cardEl.innerText = rank + suit;
+                    
+                    if (suit.includes('♥') || suit.includes('♦')) cardEl.style.color = '#ef4444';
+                    myCardsContainer.appendChild(cardEl);
+                });
+            } else {
+                // Если игра не началась — рисуем рубашки карт
+                for (let i = 0; i < 2; i++) {
+                    const cardBack = document.createElement('div');
+                    cardBack.className = 'card back';
+                    cardBack.innerText = '🂠';
+                    myCardsContainer.appendChild(cardBack);
+                }
             }
         }
-        
         
         // === ОБНОВЛЕНИЕ ДАННЫХ СОПЕРНИКОВ ===
-        // Сброс всех слотов перед обновлением
         for (let slot = 2; slot <= 4; slot++) {
             const nickEl = document.getElementById('opp' + slot + '-nick');
             const avatarEl = document.getElementById('opp' + slot + '-avatar');
@@ -500,7 +530,7 @@ async function loadPokerGameState(tableId) {
         if (state.players && Array.isArray(state.players)) {
             let oppIndex = 2;            
             state.players.forEach(function(player) {
-                // Исправлено: убраны пробелы в user_id и &&
+                if (!player) return;
                 if (player.user_id !== currentUser.id && oppIndex <= 4) {
                     const nickEl = document.getElementById('opp' + oppIndex + '-nick');
                     const avatarEl = document.getElementById('opp' + oppIndex + '-avatar');
@@ -514,58 +544,55 @@ async function loadPokerGameState(tableId) {
                 }
             });
             
-            // Обновляем статус
-                    // === НАЙДИ И ЗАМЕНИ ЭТОТ БЛОК В СВОЕЙ ФУНКЦИИ loadPokerGameState ===
-        // Обновляем статус
-        const statusEl = document.getElementById('poker-game-status');
-        if (statusEl) {
-            // Проверяем статус 'started' или флаг game_started
-            if (state.status === 'started' || state.game_started) {
-                
-                // Ищем себя в списке игроков, чтобы узнать, наш ли ход
-                const me = state.players ? state.players.find(p => p.user_id === currentUser.id) : null;
-                
-                if (me && me.is_turn) {
-                    statusEl.innerText = '🟢 Твой ход! Действуй.';
-                    document.querySelector('.poker-controls').style.opacity = '1';
-                    document.querySelector('.poker-controls').style.pointerEvents = 'auto';
-                } else {
-                    statusEl.innerText = '⏳ Ходит соперник...';
-                    document.querySelector('.poker-controls').style.opacity = '0.5';
-                    document.querySelector('.poker-controls').style.pointerEvents = 'none';
-                }
-                
-                // КРИТИЧЕСКИ: УДАЛЕН clearInterval, чтобы таймер продолжал обновлять карты во время игры!
+            // === ОБНОВЛЕНИЕ СТАТУСА И КНОПОК ===
+            const statusEl = document.getElementById('poker-game-status');
+            const controls = document.querySelector('.poker-controls');
 
-            } else {
-                statusEl.innerText = '⏳ Игроков: ' + (state.players ? state.players.length : 0) + '/' + (state.max_players || 2);
-                
-                // Пока игра не началась, отключаем кнопки ходов
-                const controls = document.querySelector('.poker-controls');
-                if (controls) {
-                    controls.style.opacity = '0.5';
-                    controls.style.pointerEvents = 'none';
+            if (statusEl) {
+                if (state.status === 'started') {
+                    // Ищем себя, чтобы понять, наш ли ход
+                    const me = state.players.find(p => p.user_id === currentUser.id);
+                    
+                    if (me && me.is_turn) {
+                        statusEl.innerText = '🟢 Твой ход! Действуй.';
+                        if (controls) {
+                            controls.style.opacity = '1';
+                            controls.style.pointerEvents = 'auto';
+                        }
+                    } else {
+                        statusEl.innerText = '⏳ Ходит соперник...';
+                        if (controls) {
+                            controls.style.opacity = '0.5';
+                            controls.style.pointerEvents = 'none';
+                        }
+                    }
+                } else {
+                    statusEl.innerText = '⏳ Игроков: ' + state.players.length + '/' + (state.max_players || 2);
+                    if (controls) {
+                        controls.style.opacity = '0.5';
+                        controls.style.pointerEvents = 'none';
+                    }
                 }
             }
         }
-            
     
         // === ОБНОВЛЕНИЕ ДАННЫХ ТЕКУЩЕГО ИГРОКА ===
         const myAvatar = document.getElementById('my-avatar-small');
-        // Исправлено: убран пробел в начале ID
         const myNick = document.getElementById('my-nick-small');
     
-        if (myAvatar) {
+        if (myAvatar && currentUser) {
             const myFirstLetter = currentUser.username ? currentUser.username.charAt(0).toUpperCase() : '?';
             myAvatar.innerText = myFirstLetter;
         }
-        // Исправлено: убран пробел в username
-        if (myNick) myNick.innerText = '@' + (currentUser.username || 'Вы');
-        
-        } catch (e) {
-            console.error('Ошибка загрузки состояния:', e);
+        if (myNick && currentUser) {
+            myNick.innerText = '@' + (currentUser.username || 'Вы');
         }
+        
+    } catch (e) {
+        console.error('Ошибка загрузки состояния покера:', e);
     }
+                        }
+                    
 
 // === ПОКЕР: МОДАЛЬНОЕ ОКНО ПОВЫШЕНИЯ ===
 let currentBet = 0;
