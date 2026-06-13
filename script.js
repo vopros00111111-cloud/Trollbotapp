@@ -636,24 +636,6 @@ async function loadPokerTables() {
     }
 }
 
-function renderPokerTables(tables) {
-    const container = document.getElementById('poker-tables-list');
-    container.innerHTML = '';
-    if (!tables || tables.length === 0) {
-        container.innerHTML = '<div style="text-align:center;padding:20px;color:#888;">Нет активных столов</div>';
-        return;
-    }
-    for (let i = 0; i < tables.length; i++) {
-        const table = tables[i];
-        const card = document.createElement('div');
-        card.className = 'poker-table-card';
-        card.style.cssText = 'background:linear-gradient(135deg,#2a2d5a,#1e2145);border-radius:16px;padding:15px;border:2px solid #3d4080;margin-bottom:10px;';
-        const isFull = table.players >= table.max_players;
-        card.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;"><div><div style="font-size:16px;font-weight:700;color:#e0e7ff;">💰 Ставка: ' + table.bet + ' 💰</div><div style="font-size:14px;color:#c4b5fd;">👥 ' + table.players + '/' + table.max_players + ' игроков</div><div style="font-size:12px;color:#9ca3af;">👤 @' + table.host_username + '</div></div><button class="action-btn" style="width:auto;padding:10px 20px;" onclick="joinPokerTable(\'' + table.table_id + '\')" ' + (isFull ? 'disabled style="opacity:0.5;"' : '') + '>' + (isFull ? 'Полон' : 'Сесть') + '</button></div>';
-        container.appendChild(card);
-    }
-}
-
 // === ПРОВЕРКА URL НА НАЛИЧИЕ TABLE_ID ===
 async function checkUrlForTable() {
     const params = new URLSearchParams(window.location.search);
