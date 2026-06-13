@@ -446,13 +446,12 @@ function openPokerGame(tableId) {
 // === ПОКЕР: ЗАГРУЗКА СОСТОЯНИЯ СТОЛА ===
 async function loadPokerGameState(tableId) {
     try {
-        // Передаем user_id параметром
+        // Передаем user_id, чтобы бэкенд знал, чьи карты отдавать
         const state = await apiRequest('/poker/table/' + tableId + '?user_id=' + currentUser.id, 'GET');
         
-        // Защита: если сервер вернул пустой или некорректный ответ
-        if (!state) return;
+        if (!state || !state.success) return;
 
-        // Обновляем банк (проверяем существование state.pot)
+        // Обновляем банк
         const potEl = document.getElementById('poker-pot');
         if (potEl) {
             potEl.innerText = (state.pot || 0) + ' 💰';
@@ -472,16 +471,15 @@ async function loadPokerGameState(tableId) {
                     const cardEl = document.createElement('div');
                     cardEl.className = 'card revealed';
                     
-                    // Проверяем формат карты (объект или строка)
-                    const rank = card.rank !== undefined ? card.rank : '';
-                    const suit = card.suit !== undefined ? card.suit : card;
+                    // Умная проверка: если карта объект {rank, suit} или просто строка
+                    let rank = card.rank !== undefined ? card.rank : '';
+                    let suit = card.suit !== undefined ? card.suit : card;
                     cardEl.innerText = rank + suit;
                     
                     if (suit.includes('♥') || suit.includes('♦')) cardEl.style.color = '#ef4444';
                     communityContainer.appendChild(cardEl);
                 });
             } else {
-                // Если карт нет — рисуем рубашки
                 for (let i = 0; i < 5; i++) {
                     const placeholder = document.createElement('div');
                     placeholder.className = 'card-placeholder';
@@ -495,21 +493,23 @@ async function loadPokerGameState(tableId) {
         const myCardsContainer = document.getElementById('my-cards');
         if (myCardsContainer) {
             myCardsContainer.innerHTML = '';
-            if (state.my_cards && state.my_cards.length > 0) {
-                state.my_cards.forEach(function(card) {
+            // Проверяем оба возможных названия массива карт от сервера
+            let cardsArray = state.my_cards || state.cards;
+            
+            if (cardsArray && cardsArray.length > 0) {
+                cardsArray.forEach(function(card) {
                     if (!card) return;
                     const cardEl = document.createElement('div');
                     cardEl.className = 'card revealed';
                     
-                    const rank = card.rank !== undefined ? card.rank : '';
-                    const suit = card.suit !== undefined ? card.suit : card;
+                    let rank = card.rank !== undefined ? card.rank : '';
+                    let suit = card.suit !== undefined ? card.suit : card;
                     cardEl.innerText = rank + suit;
                     
                     if (suit.includes('♥') || suit.includes('♦')) cardEl.style.color = '#ef4444';
                     myCardsContainer.appendChild(cardEl);
                 });
             } else {
-                // Если игра не началась — рисуем рубашки карт
                 for (let i = 0; i < 2; i++) {
                     const cardBack = document.createElement('div');
                     cardBack.className = 'card back';
@@ -549,8 +549,8 @@ async function loadPokerGameState(tableId) {
             const controls = document.querySelector('.poker-controls');
 
             if (statusEl) {
-                if (state.status === 'started') {
-                    // Ищем себя, чтобы понять, наш ли ход
+                // Если бэкенд отдал статус начатой игры
+                if (state.status === 'started' || state.game_started) {
                     const me = state.players.find(p => p.user_id === currentUser.id);
                     
                     if (me && me.is_turn) {
@@ -589,9 +589,13 @@ async function loadPokerGameState(tableId) {
         }
         
     } catch (e) {
-        console.error('Ошибка загрузки состояния покера:', e);
+        console.error('Ошибка загрузки состояния:', e);
+        // Выведем ошибку прямо на статус игры, чтобы мы её увидели без консоли!
+        const statusEl = document.getElementById('poker-game-status');
+        if (statusEl) statusEl.innerText = '❌ Ошибка JS: ' + e.message;
     }
-                        }
+    }
+                            
                     
 
 // === ПОКЕР: МОДАЛЬНОЕ ОКНО ПОВЫШЕНИЯ ===
