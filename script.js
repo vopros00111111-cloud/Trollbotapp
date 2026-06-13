@@ -429,13 +429,14 @@ async function joinPokerTable(tableId) {
 let pokerPollingInterval = null;
 
 function openPokerGame(tableId) {
+    window._currentPokerTableId = tableId;
     document.querySelectorAll('.tab-content, .game-section').forEach(function(t) { t.classList.remove('active'); });
     document.getElementById('poker-game-screen').classList.add('active');
     document.querySelector('.bottom-nav').classList.add('hidden');
     document.getElementById('poker-game-status').innerText = '⏳ Ожидание игроков...';
     document.getElementById('poker-game-table-id').innerText = 'Стол: ' + tableId;
     loadPokerGameState(tableId);
-    
+
     // Авто-обновление каждые 3 секунды
     if (pokerPollingInterval) clearInterval(pokerPollingInterval);
     pokerPollingInterval = setInterval(function() {
@@ -551,22 +552,29 @@ async function loadPokerGameState(tableId) {
             const controls = document.querySelector('.poker-controls');
 
             if (statusEl) {
-                // Если бэкенд отдал статус начатой игры
                 if (state.status === 'started' || state.game_started) {
-                    const me = state.players.find(p => p.user_id === currentUser.id);
-                    
-                    if (me && me.is_turn) {
-                        statusEl.innerText = '🟢 Твой ход! Действуй.';
-                        if (controls) {
-                            controls.style.opacity = '1';
-                            controls.style.pointerEvents = 'auto';
-                        }
-                    } else {
-                        statusEl.innerText = '⏳ Ходит соперник...';
-                        if (controls) {
-                            controls.style.opacity = '0.5';
-                            controls.style.pointerEvents = 'none';
-                        }
+                    // Игра началась — показываем этап
+                    const stageNames = {
+                        'preflop': '🃏 Префлоп',
+                        'flop': '🎴 Флоп',
+                        'turn': '🔄 Терн',
+                        'river': '🏁 Ривер'
+                    };
+                    const stageName = stageNames[state.stage] || '🃏 Игра идёт';
+                    statusEl.innerText = stageName + ' | Банк: ' + (state.pot || 0) + ' 💰';
+
+                    // Показываем кнопки управления
+                    if (controls) {
+                        controls.style.opacity = '1';
+                        controls.style.pointerEvents = 'auto';
+                    }
+
+                    // Останавливаем polling — теперь обновляем реже (каждые 5 сек)
+                    if (pokerPollingInterval) {
+                        clearInterval(pokerPollingInterval);
+                        pokerPollingInterval = setInterval(function() {
+                            loadPokerGameState(window._currentPokerTableId);
+                        }, 5000);
                     }
                 } else {
                     statusEl.innerText = '⏳ Игроков: ' + state.players.length + '/' + (state.max_players || 2);
