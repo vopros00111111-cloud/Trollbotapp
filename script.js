@@ -445,7 +445,8 @@ function openPokerGame(tableId) {
 // === ПОКЕР: ЗАГРУЗКА СОСТОЯНИЯ СТОЛА ===
 async function loadPokerGameState(tableId) {
     try {
-        const state = await apiRequest('/poker/table/' + tableId, 'GET');
+        const state = await apiRequest('/poker/table/' + tableId + '?user_id=' + currentUser.id, 'GET');
+        
         
         document.getElementById('poker-pot').innerText = state.pot + ' 💰';
         updateCurrentBet(state.current_bet || 0);
@@ -514,19 +515,40 @@ async function loadPokerGameState(tableId) {
             });
             
             // Обновляем статус
-            const statusEl = document.getElementById('poker-game-status');
-            if (statusEl) {
-                if (state.status === 'started') {
-                    statusEl.innerText = '🃏 Игра идёт!';
-                    if (pokerPollingInterval) {
-                        clearInterval(pokerPollingInterval);
-                        pokerPollingInterval = null;
-                    }
+                    // === НАЙДИ И ЗАМЕНИ ЭТОТ БЛОК В СВОЕЙ ФУНКЦИИ loadPokerGameState ===
+        // Обновляем статус
+        const statusEl = document.getElementById('poker-game-status');
+        if (statusEl) {
+            // Проверяем статус 'started' или флаг game_started
+            if (state.status === 'started' || state.game_started) {
+                
+                // Ищем себя в списке игроков, чтобы узнать, наш ли ход
+                const me = state.players ? state.players.find(p => p.user_id === currentUser.id) : null;
+                
+                if (me && me.is_turn) {
+                    statusEl.innerText = '🟢 Твой ход! Действуй.';
+                    document.querySelector('.poker-controls').style.opacity = '1';
+                    document.querySelector('.poker-controls').style.pointerEvents = 'auto';
                 } else {
-                    statusEl.innerText = '⏳ Игроков: ' + state.players.length + '/' + state.max_players;
+                    statusEl.innerText = '⏳ Ходит соперник...';
+                    document.querySelector('.poker-controls').style.opacity = '0.5';
+                    document.querySelector('.poker-controls').style.pointerEvents = 'none';
+                }
+                
+                // КРИТИЧЕСКИ: УДАЛЕН clearInterval, чтобы таймер продолжал обновлять карты во время игры!
+
+            } else {
+                statusEl.innerText = '⏳ Игроков: ' + (state.players ? state.players.length : 0) + '/' + (state.max_players || 2);
+                
+                // Пока игра не началась, отключаем кнопки ходов
+                const controls = document.querySelector('.poker-controls');
+                if (controls) {
+                    controls.style.opacity = '0.5';
+                    controls.style.pointerEvents = 'none';
                 }
             }
         }
+            
     
         // === ОБНОВЛЕНИЕ ДАННЫХ ТЕКУЩЕГО ИГРОКА ===
         const myAvatar = document.getElementById('my-avatar-small');
@@ -660,7 +682,94 @@ async function checkUrlForTable() {
         }
     }
 }
+// Добавь это в самый конец файла script.js
+function renderPokerTable(table) {
+    if (!table) return;
 
+    const statusEl = document.getElementById('poker-game-status');
+    const tableIdEl = document.getElementById('poker-game-table-id');
+    if (tableIdEl && table.table_id) tableIdEl.innerText = 'Стол: ' + table.table_id;
+
+    // === СЦЕНАРИЙ 1: ИГРА НАЧАЛАСЬ ===
+    if (table.game_started) {
+        if (statusEl) statusEl.innerText = '🔥 Игра началась! Раздача карт...';
+        
+        // Обновляем банк стола
+        const potEl = document.getElementById('poker-pot');
+        if (potEl) potEl.innerText = (table.pot || 0) + ' 💰';
+
+        // Обновляем текущую общую ставку на столе через твою функцию
+        if (typeof updateCurrentBet === 'function') {
+            updateCurrentBet(table.current_bet || 0);
+        }
+
+        // Ищем себя среди игроков за столом, чтобы узнать свои карты
+        const me = table.players ? table.players.find(p => p.user_id === currentUser.id) : null;
+        
+        // Отрисовываем твои карманные карты
+        const myCardsContainer = document.getElementById('my-cards');
+        if (myCardsContainer) {
+            myCardsContainer.innerHTML = '';
+            if (me && me.cards && me.cards.length > 0) {
+                me.cards.forEach(card => {
+                    const cardEl = document.createElement('div');
+                    cardEl.className = 'poker-card';
+                    // Красим червы ♥ и буби ♦ в красный цвет
+                    if (card.includes('♥') || card.includes('♦')) {
+                        cardEl.style.color = '#ef4444';
+                    }
+                    cardEl.innerText = card;
+                    myCardsContainer.appendChild(cardEl);
+                });
+            } else {
+                myCardsContainer.innerHTML = '<div style="color: #64748b;">Ожидание раздачи...</div>';
+            }
+        }
+
+        // Отрисовываем общие карты на столе (Флоп, Терн, Ривер)
+        const communityContainer = document.getElementById('community-cards');
+        if (communityContainer) {
+            communityContainer.innerHTML = '';
+            if (table.community_cards && table.community_cards.length > 0) {
+                table.community_cards.forEach(card => {
+                    const cardEl = document.createElement('div');
+                    cardEl.className = 'poker-card';
+                    if (card.includes('♥') || card.includes('♦')) cardEl.style.color = '#ef4444';
+                    cardEl.innerText = card;
+                    communityContainer.appendChild(cardEl);
+                });
+            } else {
+                communityContainer.innerHTML = '<div style="color: #64748b; font-style: italic; font-size: 14px;">Префлоп. Ожидание ставок...</div>';
+            }
+        }
+
+        // Включаем или блокируем кнопки действий (если твой ход — кнопки активны)
+        const controlsAction = document.querySelector('.poker-controls');
+        if (controlsAction) {
+            if (me && me.is_turn) {
+                controlsAction.style.opacity = '1';
+                controlsAction.style.pointerEvents = 'auto';
+                if (statusEl) statusEl.innerText = '🟢 Твой ход! Действуй.';
+            } else {
+                controlsAction.style.opacity = '0.5';
+                controlsAction.style.pointerEvents = 'none';
+                if (statusEl) statusEl.innerText = '⏳ Ходит соперник...';
+            }
+        }
+
+    // === СЦЕНАРИЙ 2: ОЖИДАНИЕ ИГРОКОВ ===
+    } else {
+        const playersCount = table.players ? table.players.length : 0;
+        if (statusEl) statusEl.innerText = `⏳ Ожидание игроков (${playersCount}/2)...`;
+        
+        const controlsAction = document.querySelector('.poker-controls');
+        if (controlsAction) {
+            controlsAction.style.opacity = '0.5';
+            controlsAction.style.pointerEvents = 'none';
+        }
+    }
+}
+    
 // === ЗАПУСК ПРИЛОЖЕНИЯ ===
 window.addEventListener('load', async function() {
     console.log('Приложение загружено');
