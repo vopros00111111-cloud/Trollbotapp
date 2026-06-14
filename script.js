@@ -648,6 +648,7 @@ async function pokerCall() {
             action: 'call'
         });
         if (res.success) {
+            tg.showAlert('✅ Вы поддержали ставку');
             await loadPokerGameState(currentPokerTableId);
         } else {
             tg.showAlert('❌ ' + (res.error || 'Ошибка'));
@@ -686,6 +687,7 @@ async function pokerRaise(amount) {
             amount: amount
         });
         if (res.success) {
+            tg.showAlert('✅ Вы повысили ставку');
             await loadPokerGameState(currentPokerTableId);
         } else {
             tg.showAlert('❌ ' + (res.error || 'Ошибка'));
