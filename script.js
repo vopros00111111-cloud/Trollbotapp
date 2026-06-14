@@ -428,8 +428,10 @@ async function joinPokerTable(tableId) {
 // === ПОКЕР: ОТКРЫТИЕ СТОЛА ===
 let pokerPollingInterval = null;
 
+let currentPokerTableId = null;
+
 function openPokerGame(tableId) {
-    window._currentPokerTableId = tableId;
+    currentPokerTableId = tableId;
     document.querySelectorAll('.tab-content, .game-section').forEach(function(t) { t.classList.remove('active'); });
     document.getElementById('poker-game-screen').classList.add('active');
     document.querySelector('.bottom-nav').classList.add('hidden');
@@ -437,7 +439,6 @@ function openPokerGame(tableId) {
     document.getElementById('poker-game-table-id').innerText = 'Стол: ' + tableId;
     loadPokerGameState(tableId);
 
-    // Авто-обновление каждые 3 секунды
     if (pokerPollingInterval) clearInterval(pokerPollingInterval);
     pokerPollingInterval = setInterval(function() {
         loadPokerGameState(tableId);
@@ -553,28 +554,17 @@ async function loadPokerGameState(tableId) {
 
             if (statusEl) {
                 if (state.status === 'started' || state.game_started) {
-                    // Игра началась — показываем этап
-                    const stageNames = {
-                        'preflop': '🃏 Префлоп',
-                        'flop': '🎴 Флоп',
-                        'turn': '🔄 Терн',
-                        'river': '🏁 Ривер'
-                    };
+                    const stageNames = { preflop: '🃏 Префлоп', flop: '🎴 Флоп', turn: '🔄 Терн', river: '🏁 Ривер' };
                     const stageName = stageNames[state.stage] || '🃏 Игра идёт';
                     statusEl.innerText = stageName + ' | Банк: ' + (state.pot || 0) + ' 💰';
-
-                    // Показываем кнопки управления
                     if (controls) {
                         controls.style.opacity = '1';
                         controls.style.pointerEvents = 'auto';
                     }
-
-                    // Останавливаем polling — теперь обновляем реже (каждые 5 сек)
+                    // Замедляем polling когда игра идёт
                     if (pokerPollingInterval) {
                         clearInterval(pokerPollingInterval);
-                        pokerPollingInterval = setInterval(function() {
-                            loadPokerGameState(window._currentPokerTableId);
-                        }, 5000);
+                        pokerPollingInterval = setInterval(function() { loadPokerGameState(currentPokerTableId); }, 5000);
                     }
                 } else {
                     statusEl.innerText = '⏳ Игроков: ' + state.players.length + '/' + (state.max_players || 2);
@@ -650,15 +640,59 @@ function confirmRaise() {
 
 // === ПОКЕР: ДЕЙСТВИЯ ===
 async function pokerCall() {
-    tg.showAlert('✅ Колл! (в разработке)');
+    if (!currentPokerTableId) return;
+    try {
+        const res = await apiRequest('/poker/action', 'POST', {
+            user_id: currentUser.id,
+            table_id: currentPokerTableId,
+            action: 'call'
+        });
+        if (res.success) {
+            await loadPokerGameState(currentPokerTableId);
+        } else {
+            tg.showAlert('❌ ' + (res.error || 'Ошибка'));
+        }
+    } catch (e) {
+        tg.showAlert('❌ Ошибка: ' + e.message);
+    }
 }
 
 async function pokerFold() {
-    tg.showAlert('❌ Фолд! (в разработке)');
+    if (!currentPokerTableId) return;
+    try {
+        const res = await apiRequest('/poker/action', 'POST', {
+            user_id: currentUser.id,
+            table_id: currentPokerTableId,
+            action: 'fold'
+        });
+        if (res.success) {
+            tg.showAlert('❌ Вы сбросили карты');
+            await loadPokerGameState(currentPokerTableId);
+        } else {
+            tg.showAlert('❌ ' + (res.error || 'Ошибка'));
+        }
+    } catch (e) {
+        tg.showAlert('❌ Ошибка: ' + e.message);
+    }
 }
 
 async function pokerRaise(amount) {
-    tg.showAlert('📈 Повышение до ' + amount + ' монет! (в разработке)');
+    if (!currentPokerTableId) return;
+    try {
+        const res = await apiRequest('/poker/action', 'POST', {
+            user_id: currentUser.id,
+            table_id: currentPokerTableId,
+            action: 'raise',
+            amount: amount
+        });
+        if (res.success) {
+            await loadPokerGameState(currentPokerTableId);
+        } else {
+            tg.showAlert('❌ ' + (res.error || 'Ошибка'));
+        }
+    } catch (e) {
+        tg.showAlert('❌ Ошибка: ' + e.message);
+    }
 }
 
 function updateCurrentBet(amount) {
