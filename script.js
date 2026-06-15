@@ -644,13 +644,17 @@ function confirmRaise() {
 
 // === ПОКЕР: ФИНАЛЬНЫЙ ЭКРАН ===
 function showPokerResult(state) {
+    // Не добавляем оверлей если он уже есть
+    if (document.querySelector('.poker-result-overlay')) return;
+
     const wi = state.winner_info;
+    if (!wi) return;
     const showdown = state.showdown || {};
-    const winnerNames = (wi.winner_names || []).map(n => '@' + n).join(', ');
+    const winnerNames = (wi.winner_names || []).map(function(n) { return '@' + n; }).join(', ');
     const combo = wi.combo || '';
     const pot = wi.pot || 0;
 
-    // Строим HTML карт всех игроков
+    // Карты игроков
     let playersHtml = '';
     Object.values(showdown).forEach(function(p) {
         const isWinner = (wi.winner_names || []).includes(p.username);
@@ -661,8 +665,15 @@ function showPokerResult(state) {
             + '</div>';
     });
 
-    // Карты на столе
-    const communityHtml = (state.community_cards || []).map(function(c) { return renderCard(c); }).join('');
+    // Карты на столе — берём из showdown данных если community_cards пустой
+    let communityCards = state.community_cards || [];
+    // При stage=finished сервер может отдать пустой массив — используем wi.community если есть
+    const communityHtml = communityCards.length > 0
+        ? communityCards.map(function(c) { return renderCard(c); }).join('')
+        : '<span style="color:#888">—</span>';
+
+    const screen = document.getElementById('poker-game-screen');
+    if (!screen) return;
 
     const overlay = document.createElement('div');
     overlay.className = 'poker-result-overlay';
@@ -670,14 +681,14 @@ function showPokerResult(state) {
         '<div class="poker-result-box">'
         + '<div class="result-title">🃏 Игра окончена!</div>'
         + '<div class="result-pot">Банк: ' + pot + ' 💰</div>'
-        + '<div class="result-community">' + communityHtml + '</div>'
+        + (communityCards.length > 0 ? '<div class="result-community">' + communityHtml + '</div>' : '')
         + '<div class="result-winner">🏆 ' + winnerNames + ' выиграл!</div>'
         + (combo ? '<div class="result-combo">Комбинация: ' + combo + '</div>' : '')
         + '<div class="result-showdown">' + playersHtml + '</div>'
-        + '<button class="action-btn" onclick="this.parentElement.parentElement.remove(); closeGame(\'poker\')">Выйти</button>'
+        + '<button class="action-btn" onclick="var o=document.querySelector(\'.poker-result-overlay\'); if(o) o.remove(); closeGame(\'poker\');">Выйти</button>'
         + '</div>';
 
-    document.getElementById('poker-game-screen').appendChild(overlay);
+    screen.appendChild(overlay);
 }
 
 // === ПОКЕР: ДЕЙСТВИЯ ===
