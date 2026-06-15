@@ -681,15 +681,36 @@ function showPokerResult(state) {
 
 // === ПОКЕР: ДЕЙСТВИЯ ===
 async function pokerCall() {
-    tg.showAlert('✅ Колл! (в разработке)');
+    if (!currentPokerTableId) return;
+    try {
+        const res = await apiRequest('/poker/action', 'POST', {
+            user_id: currentUser.id, table_id: currentPokerTableId, action: 'call'
+        });
+        if (res.success) { await loadPokerGameState(currentPokerTableId); }
+        else { tg.showAlert('❌ ' + (res.error || 'Ошибка')); }
+    } catch (e) { tg.showAlert('❌ ' + e.message); }
 }
 
 async function pokerFold() {
-    tg.showAlert('❌ Фолд! (в разработке)');
+    if (!currentPokerTableId) return;
+    try {
+        const res = await apiRequest('/poker/action', 'POST', {
+            user_id: currentUser.id, table_id: currentPokerTableId, action: 'fold'
+        });
+        if (res.success) { tg.showAlert('❌ Вы сбросили карты'); await loadPokerGameState(currentPokerTableId); }
+        else { tg.showAlert('❌ ' + (res.error || 'Ошибка')); }
+    } catch (e) { tg.showAlert('❌ ' + e.message); }
 }
 
 async function pokerRaise(amount) {
-    tg.showAlert('📈 Повышение до ' + amount + ' монет! (в разработке)');
+    if (!currentPokerTableId) return;
+    try {
+        const res = await apiRequest('/poker/action', 'POST', {
+            user_id: currentUser.id, table_id: currentPokerTableId, action: 'raise', amount: amount
+        });
+        if (res.success) { await loadPokerGameState(currentPokerTableId); }
+        else { tg.showAlert('❌ ' + (res.error || 'Ошибка')); }
+    } catch (e) { tg.showAlert('❌ ' + e.message); }
 }
 
 function updateCurrentBet(amount) {
