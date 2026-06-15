@@ -835,16 +835,30 @@ function renderPokerTable(table) {
 // === ЗАПУСК ПРИЛОЖЕНИЯ ===
 window.addEventListener('load', async function() {
     console.log('Приложение загружено');
+    
+    // 1. Инициализируем юзера
     initUser();
+    
     if (currentUser) {
-        await Promise.all([
-            loadBalance(),
-            loadStats(),
-            loadTop(),
-            loadGames(),
+        // 2. Используем Promise.allSettled вместо Promise.all. 
+        // Если один эндпоинт (например, каталог) упадет, остальные все равно загрузятся!
+        await Promise.allSettled([
+            loadBalance(), 
+            loadStats(), 
+            loadTop(), 
+            loadGames(), 
             loadCatalog()
         ]);
+        
+        // 3. Проверяем, не перешел ли юзер по прямой ссылке в покер
         await checkUrlForTable();
     }
-    console.log('Все данные загружены');
+    
+    // 4. АКТИВИРУЕМ ИНТЕРФЕЙС: Принудительно включаем главную вкладку, чтобы убрать экраны загрузки
+    switchTab('home'); 
+    
+    // 5. Сообщаем Telegram, что приложение полностью готово к отрисовке
+    tg.ready();
+    
+    console.log('Все данные загружены, интерфейс переключен на Home');
 });
