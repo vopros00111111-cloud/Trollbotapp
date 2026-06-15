@@ -9,7 +9,7 @@ tg.setBackgroundColor('#1a1a2e');
 let currentUser = null;
 let currentBalance = 0;
 
-// === ИНИЦИАЛИЗАЦИЯ ПОЛЬЗОВАТЕЛЯ. ===
+// === ИНИЦИАЛИЗАЦИЯ ПОЛЬЗОВАТЕЛЯ ===
 function initUser() {
     const initData = tg.initDataUnsafe;
     const user = initData ? initData.user : null;
@@ -560,25 +560,17 @@ async function loadPokerGameState(tableId) {
             const controls = document.querySelector('.poker-controls');
 
             if (statusEl) {
-                // Если бэкенд отдал статус начатой игры
                 if (state.status === 'started' || state.game_started) {
-                    const me = state.players.find(p => p.user_id === currentUser.id);
-                    
-                    if (me && me.is_turn) {
-                        statusEl.innerText = '🟢 Твой ход! Действуй.';
-                        if (controls) {
-                            controls.style.opacity = '1';
-                            controls.style.pointerEvents = 'auto';
-                        }
-                    } else {
-                        statusEl.innerText = '⏳ Ходит соперник...';
-                        if (controls) {
-                            controls.style.opacity = '0.5';
-                            controls.style.pointerEvents = 'none';
-                        }
+                    const stageNames = { preflop: '🃏 Префлоп', flop: '🎴 Флоп', turn: '🔄 Терн', river: '🏁 Ривер' };
+                    const stageName = stageNames[state.stage] || '🃏 Игра идёт';
+                    statusEl.innerText = stageName + ' | Банк: ' + (state.pot || 0) + ' 💰';
+                    // Кнопки активны всегда во время игры
+                    if (controls) {
+                        controls.style.opacity = '1';
+                        controls.style.pointerEvents = 'auto';
                     }
                 } else {
-                    statusEl.innerText = '⏳ Игроков: ' + state.players.length + '/' + (state.max_players || 2);
+                    statusEl.innerText = '⏳ Игроков: ' + (state.players ? state.players.length : 0) + '/' + (state.max_players || 2);
                     if (controls) {
                         controls.style.opacity = '0.5';
                         controls.style.pointerEvents = 'none';
@@ -687,8 +679,24 @@ function showPokerResult(state) {
     document.getElementById('poker-game-screen').appendChild(overlay);
 }
 
+// === ПОКЕР: ДЕЙСТВИЯ ===
+async function pokerCall() {
+    tg.showAlert('✅ Колл! (в разработке)');
+}
 
-    
+async function pokerFold() {
+    tg.showAlert('❌ Фолд! (в разработке)');
+}
+
+async function pokerRaise(amount) {
+    tg.showAlert('📈 Повышение до ' + amount + ' монет! (в разработке)');
+}
+
+function updateCurrentBet(amount) {
+    currentBet = amount;
+    document.getElementById('current-bet').innerText = amount;
+}
+
 // === ПОКЕР: СПИСОК СТОЛОВ ===
 async function loadPokerTables() {
     try {
@@ -792,15 +800,8 @@ function renderPokerTable(table) {
         // Включаем или блокируем кнопки действий (если твой ход — кнопки активны)
         const controlsAction = document.querySelector('.poker-controls');
         if (controlsAction) {
-            if (me && me.is_turn) {
-                controlsAction.style.opacity = '1';
-                controlsAction.style.pointerEvents = 'auto';
-                if (statusEl) statusEl.innerText = '🟢 Твой ход! Действуй.';
-            } else {
-                controlsAction.style.opacity = '0.5';
-                controlsAction.style.pointerEvents = 'none';
-                if (statusEl) statusEl.innerText = '⏳ Ходит соперник...';
-            }
+            controlsAction.style.opacity = '1';
+            controlsAction.style.pointerEvents = 'auto';
         }
 
     // === СЦЕНАРИЙ 2: ОЖИДАНИЕ ИГРОКОВ ===
@@ -821,15 +822,8 @@ window.addEventListener('load', async function() {
     console.log('Приложение загружено');
     initUser();
     if (currentUser) {
-        await Promise.all([
-            loadBalance(),
-            loadStats(),
-            loadTop(),
-            loadGames(),
-            loadCatalog()
-        ]);
+        await Promise.all([loadBalance(), loadStats(), loadTop(), loadGames(), loadCatalog()]);
         await checkUrlForTable();
     }
     console.log('Все данные загружены');
 });
-
