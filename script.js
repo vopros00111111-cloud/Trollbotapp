@@ -449,6 +449,7 @@ async function joinPokerTable(tableId) {
 let pokerPollingInterval = null;
 
 function openPokerGame(tableId) {
+    currentPokerTableId = tableId;
     document.querySelectorAll('.tab-content, .game-section').forEach(function(t) { t.classList.remove('active'); });
     document.getElementById('poker-game-screen').classList.add('active');
     document.querySelector('.bottom-nav').classList.add('hidden');
