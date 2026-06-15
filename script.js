@@ -837,7 +837,13 @@ window.addEventListener('load', async function() {
     console.log('Приложение загружено');
     initUser();
     if (currentUser) {
-        await Promise.all([loadBalance(), loadStats(), loadTop(), loadGames(), loadCatalog()]);
+        await Promise.all([
+            loadBalance(),
+            loadStats(),
+            loadTop(),
+            loadGames(),
+            loadCatalog()
+        ]);
         await checkUrlForTable();
     }
     console.log('Все данные загружены');
