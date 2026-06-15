@@ -687,134 +687,6 @@ function showPokerResult(state) {
     document.getElementById('poker-game-screen').appendChild(overlay);
 }
 
-// === КНОПКИ ДЕЙСТВИЙ В ПОКЕРЕ ===
-// ==========================================
-//    УПРАВЛЕНИЕ КНОПКАМИ ДЕЙСТВИЙ В ПОКЕРЕ
-// ==========================================
-
-// 1. Функция ФОЛД (Пас / Сбросить карты)
-async function pokerFold() {
-    if (!currentPokerTableId || !currentUser) {
-        console.error("Нет ID стола или данных пользователя");
-        return;
-    }
-    
-    try {
-        const response = await apiRequest('/poker/action', 'POST', {
-            table_id: currentPokerTableId,
-            user_id: currentUser.id,
-            action: 'fold'
-        });
-        
-        console.log('Фолд засчитан:', response);
-        
-        // Сразу обновляем стол, чтобы увидеть изменения на экране
-        if (typeof pollPokerTable === 'function') {
-            await pollPokerTable(); 
-        }
-    } catch (error) {
-        console.error('Ошибка при выполнении фолда:', error);
-        tg.showAlert('Не удалось сделать фолд: ' + error.message);
-    }
-}
-
-// 2. Функция КОЛЛ (Уравнять ставку или Чек)
-async function pokerCall() {
-    if (!currentPokerTableId || !currentUser) {
-        console.error("Нет ID стола или данных пользователя");
-        return;
-    }
-    
-    try {
-        const response = await apiRequest('/poker/action', 'POST', {
-            table_id: currentPokerTableId,
-            user_id: currentUser.id,
-            action: 'call'
-        });
-        
-        console.log('Колл/Чек выполнен успешно:', response);
-        
-        // Сразу обновляем стол
-        if (typeof pollPokerTable === 'function') {
-            await pollPokerTable();
-        }
-    } catch (error) {
-        console.error('Ошибка при выполнении колла:', error);
-        tg.showAlert('Не удалось сделать колл: ' + error.message);
-    }
-}
-
-// 3. Открытие модального окна для Повышения ставки (Рейз)
-function openRaiseModal() {
-    const modal = document.getElementById('raise-modal');
-    if (modal) {
-        modal.style.display = 'flex'; // Показываем модалку
-        // Сбрасываем дефолтное значение ползунка/инпута на 20
-        setRaiseAmount(20);
-    }
-}
-
-// 4. Закрытие модального окна Рейза
-function closeRaiseModal() {
-    const modal = document.getElementById('raise-modal');
-    if (modal) {
-        modal.style.display = 'none'; // Скрываем модалку
-    }
-}
-
-// 5. Быстрый выбор суммы кнопками внутри модалки (+20, +50, +100...)
-function setRaiseAmount(amount) {
-    const input = document.getElementById('raise-amount');
-    const totalDisplay = document.getElementById('total-raise');
-    
-    if (input) {
-        input.value = amount;
-    }
-    if (totalDisplay) {
-        totalDisplay.innerText = amount;
-    }
-}
-
-// Вешаем слежение за ручным вводом суммы в инпут, чтобы итоговое число обновлялось
-document.getElementById('raise-amount')?.addEventListener('input', function(e) {
-    const totalDisplay = document.getElementById('total-raise');
-    if (totalDisplay) {
-        totalDisplay.innerText = e.target.value || 0;
-    }
-});
-
-// 6. Подтверждение Рейза (кнопка "Подтвердить" внутри модалки)
-async function confirmRaise() {
-    if (!currentPokerTableId || !currentUser) return;
-    
-    const amountInput = document.getElementById('raise-amount');
-    const amount = parseInt(amountInput ? amountInput.value : 0);
-    
-    if (isNaN(amount) || amount <= 0) {
-        tg.showAlert('Пожалуйста, введите корректную сумму для ставки!');
-        return;
-    }
-
-    try {
-        const response = await apiRequest('/poker/action', 'POST', {
-            table_id: currentPokerTableId,
-            user_id: currentUser.id,
-            action: 'raise',
-            amount: amount // Отправляем серверу сумму, на которую повышаем
-        });
-        
-        console.log('Рейз успешно отправлен:', response);
-        
-        // Закрываем окно и обновляем данные стола
-        closeRaiseModal();
-        if (typeof pollPokerTable === 'function') {
-            await pollPokerTable();
-        }
-    } catch (error) {
-        console.error('Ошибка при выполнении рейза:', error);
-        tg.showAlert('Не удалось повысить ставку: ' + error.message);
-    }
-}
 
     
 // === ПОКЕР: СПИСОК СТОЛОВ ===
@@ -918,45 +790,167 @@ function renderPokerTable(table) {
         }
 
         // Включаем или блокируем кнопки действий (если твой ход — кнопки активны)
+                // Включаем или блокируем кнопки действий
         const controlsAction = document.querySelector('.poker-controls');
+        // Находим плашку статуса (если она есть в HTML, например, под столом)
+        const statusEl = document.getElementById('poker-status'); 
+
         if (controlsAction) {
+            // ВРЕМЕННО ДЛЯ ТЕСТА: всегда делаем кнопки активными, чтобы проверить их работу
+            controlsAction.style.opacity = '1';
+            controlsAction.style.pointerEvents = 'auto';
+            
             if (me && me.is_turn) {
-                controlsAction.style.opacity = '1';
-                controlsAction.style.pointerEvents = 'auto';
                 if (statusEl) statusEl.innerText = '🟢 Твой ход! Действуй.';
+                controlsAction.style.boxShadow = '0 0 15px rgba(74, 222, 128, 0.5)'; // Подсветим зеленым
             } else {
-                controlsAction.style.opacity = '0.5';
-                controlsAction.style.pointerEvents = 'none';
-                if (statusEl) statusEl.innerText = '⏳ Ходит соперник...';
+                if (statusEl) statusEl.innerText = '⏳ Ходит соперник... (Тест: кнопки включены)';
+                controlsAction.style.boxShadow = 'none';
             }
         }
 
     // === СЦЕНАРИЙ 2: ОЖИДАНИЕ ИГРОКОВ ===
     } else {
         const playersCount = table.players ? table.players.length : 0;
+        const statusEl = document.getElementById('poker-status');
         if (statusEl) statusEl.innerText = `⏳ Ожидание игроков (${playersCount}/2)...`;
         
         const controlsAction = document.querySelector('.poker-controls');
         if (controlsAction) {
+            // Во время ожидания второго игрока кнопки всё-таки выключаем
             controlsAction.style.opacity = '0.5';
             controlsAction.style.pointerEvents = 'none';
         }
     }
 }
+
+// ==========================================
+//    ЛОГИКА РАБОТЫ КНОПОК ДЕЙСТВИЙ В ПОКЕРЕ
+// ==========================================
+
+// 1. Кнопка ФОЛД (Пас)
+async function pokerFold() {
+    if (!currentPokerTableId || !currentUser) {
+        tg.showAlert('Игра не активна или пользователь не авторизован');
+        return;
+    }
+    try {
+        const response = await apiRequest('/poker/action', 'POST', {
+            table_id: currentPokerTableId,
+            user_id: currentUser.id,
+            action: 'fold'
+        });
+        console.log('Фолд выполнен успешно:', response);
+        // Сразу запрашиваем обновление состояния стола
+        if (typeof pollPokerTable === 'function') await pollPokerTable();
+    } catch (error) {
+        console.error('Ошибка фолда:', error);
+        tg.showAlert('Ошибка фолда: ' + error.message);
+    }
+}
+
+// 2. Кнопка КОЛЛ / ЧЕК
+async function pokerCall() {
+    if (!currentPokerTableId || !currentUser) {
+        tg.showAlert('Игра не активна или пользователь не авторизован');
+        return;
+    }
+    try {
+        const response = await apiRequest('/poker/action', 'POST', {
+            table_id: currentPokerTableId,
+            user_id: currentUser.id,
+            action: 'call'
+        });
+        console.log('Колл выполнен успешно:', response);
+        if (typeof pollPokerTable === 'function') await pollPokerTable();
+    } catch (error) {
+        console.error('Ошибка колла:', error);
+        tg.showAlert('Ошибка колла: ' + error.message);
+    }
+}
+
+// 3. Открыть окно повышения (Рейз)
+function openRaiseModal() {
+    const modal = document.getElementById('raise-modal');
+    if (modal) {
+        modal.style.display = 'flex'; // Показываем модалку поверх игры
+        setRaiseAmount(20); // Ставим базовую ставку 20
+    } else {
+        console.error('Не найдена модалка raise-modal в HTML!');
+    }
+}
+
+// 4. Закрыть окно повышения
+function closeRaiseModal() {
+    const modal = document.getElementById('raise-modal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
+// 5. Выбор суммы быстрыми кнопками (+20, +50...)
+function setRaiseAmount(amount) {
+    const input = document.getElementById('raise-amount');
+    const totalDisplay = document.getElementById('total-raise');
+    if (input) input.value = amount;
+    if (totalDisplay) totalDisplay.innerText = amount;
+}
+
+// Подтверждение Рейза (кнопка внутри модалки)
+async function confirmRaise() {
+    if (!currentPokerTableId || !currentUser) return;
     
+    const amountInput = document.getElementById('raise-amount');
+    const amount = parseInt(amountInput ? amountInput.value : 0);
+    
+    if (isNaN(amount) || amount <= 0) {
+        tg.showAlert('Введите число больше нуля!');
+        return;
+    }
+
+    try {
+        const response = await apiRequest('/poker/action', 'POST', {
+            table_id: currentPokerTableId,
+            user_id: currentUser.id,
+            action: 'raise',
+            amount: amount
+        });
+        console.log('Рейз выполнен успешно:', response);
+        closeRaiseModal();
+        if (typeof pollPokerTable === 'function') await pollPokerTable();
+    } catch (error) {
+        console.error('Ошибка рейза:', error);
+        tg.showAlert('Ошибка рейза: ' + error.message);
+    }
+}
+
+// Следим за ручным изменением инпута рейза (чтобы обновлять счетчик "Итого")
+document.addEventListener('DOMContentLoaded', () => {
+    const raiseInput = document.getElementById('raise-amount');
+    if (raiseInput) {
+        raiseInput.addEventListener('input', function(e) {
+            const totalDisplay = document.getElementById('total-raise');
+            if (totalDisplay) {
+                totalDisplay.innerText = e.target.value || 0;
+            }
+        });
+    }
+});
+
 // === ЗАПУСК ПРИЛОЖЕНИЯ ===
 window.addEventListener('load', async function() {
     console.log('Приложение загружено');
     initUser();
     if (currentUser) {
-        await Promise.all([
-            loadBalance(),
-            loadStats(),
-            loadTop(),
-            loadGames(),
+        await Promise.allSettled([
+            loadBalance(), 
+            loadStats(), 
+            loadTop(), 
+            loadGames(), 
             loadCatalog()
         ]);
         await checkUrlForTable();
     }
-    console.log('Все данные загружены');
+    switchTab('home');
+    tg.ready();
 });
