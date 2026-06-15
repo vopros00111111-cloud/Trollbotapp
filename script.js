@@ -1,4 +1,3 @@
-let currentPokerTableId = null;
 const API_URL = 'https://trollbot-mml4.onrender.com/api';
 const tg = window.Telegram.WebApp;
 tg.ready();
@@ -6,6 +5,7 @@ tg.expand();
 tg.setHeaderColor('#16213e');
 tg.setBackgroundColor('#1a1a2e');
 
+let currentPokerTableId = null;
 let currentUser = null;
 let currentBalance = 0;
 
