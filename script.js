@@ -9,7 +9,7 @@ tg.setBackgroundColor('#1a1a2e');
 let currentUser = null;
 let currentBalance = 0;
 
-// === ИНИЦИАЛИЗАЦИЯ ПОЛЬЗОВАТЕЛЯ ===
+// === ИНИЦИАЛИЗАЦИЯ ПОЛЬЗОВАТЕЛЯ. ===
 function initUser() {
     const initData = tg.initDataUnsafe;
     const user = initData ? initData.user : null;
