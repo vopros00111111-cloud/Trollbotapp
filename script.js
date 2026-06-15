@@ -121,7 +121,7 @@ function renderTop(topList) {
     }
     for (let i = 0; i < topList.length; i++) {
         const player = topList[i];
-        let medal = (i === 0) ? '' : (i === 1) ? '' : (i === 2) ? '🥉' : (i + 1) + '.';
+        let medal = (i === 0) ? '🥇' : (i === 1) ? '🥈' : (i === 2) ? '🥉' : (i + 1) + '.';
         const item = document.createElement('div');
         item.className = 'top-item';
         item.innerHTML = '<span class="top-place">' + medal + '</span><span class="top-name">@' + player.username + '</span><span class="top-score">' + player.balance.toLocaleString() + '</span>';
