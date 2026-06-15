@@ -1,3 +1,4 @@
+let currentPokerTableId = null;
 const API_URL = 'https://trollbot-mml4.onrender.com/api';
 const tg = window.Telegram.WebApp;
 tg.ready();
@@ -5,7 +6,6 @@ tg.expand();
 tg.setHeaderColor('#16213e');
 tg.setBackgroundColor('#1a1a2e');
 
-let currentPokerTableId = null;
 let currentUser = null;
 let currentBalance = 0;
 
@@ -681,7 +681,7 @@ function showPokerResult(state) {
         + '<div class="result-winner">🏆 ' + winnerNames + ' выиграл!</div>'
         + (combo ? '<div class="result-combo">Комбинация: ' + combo + '</div>' : '')
         + '<div class="result-showdown">' + playersHtml + '</div>'
-        + '<button class="action-btn" onclick="this.parentElement.parentElement.remove(); closeGame('poker')">Выйти</button>'
+        + '<button class="action-btn" onclick="this.parentElement.parentElement.remove(); closeGame(\'poker\')">Выйти</button>'
         + '</div>';
 
     document.getElementById('poker-game-screen').appendChild(overlay);
@@ -835,30 +835,16 @@ function renderPokerTable(table) {
 // === ЗАПУСК ПРИЛОЖЕНИЯ ===
 window.addEventListener('load', async function() {
     console.log('Приложение загружено');
-    
-    // 1. Инициализируем юзера
     initUser();
-    
     if (currentUser) {
-        // 2. Используем Promise.allSettled вместо Promise.all. 
-        // Если один эндпоинт (например, каталог) упадет, остальные все равно загрузятся!
-        await Promise.allSettled([
-            loadBalance(), 
-            loadStats(), 
-            loadTop(), 
-            loadGames(), 
+        await Promise.all([
+            loadBalance(),
+            loadStats(),
+            loadTop(),
+            loadGames(),
             loadCatalog()
         ]);
-        
-        // 3. Проверяем, не перешел ли юзер по прямой ссылке в покер
         await checkUrlForTable();
     }
-    
-    // 4. АКТИВИРУЕМ ИНТЕРФЕЙС: Принудительно включаем главную вкладку, чтобы убрать экраны загрузки
-    switchTab('home'); 
-    
-    // 5. Сообщаем Telegram, что приложение полностью готово к отрисовке
-    tg.ready();
-    
-    console.log('Все данные загружены, интерфейс переключен на Home');
+    console.log('Все данные загружены');
 });
