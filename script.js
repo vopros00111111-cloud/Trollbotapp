@@ -688,10 +688,16 @@ function showPokerResult(state) {
 }
 
 // === КНОПКИ ДЕЙСТВИЙ В ПОКЕРЕ ===
+// ==========================================
+//    УПРАВЛЕНИЕ КНОПКАМИ ДЕЙСТВИЙ В ПОКЕРЕ
+// ==========================================
 
-// 1. Функция ФОЛД (Сбросить карты)
+// 1. Функция ФОЛД (Пас / Сбросить карты)
 async function pokerFold() {
-    if (!currentPokerTableId || !currentUser) return;
+    if (!currentPokerTableId || !currentUser) {
+        console.error("Нет ID стола или данных пользователя");
+        return;
+    }
     
     try {
         const response = await apiRequest('/poker/action', 'POST', {
@@ -700,20 +706,24 @@ async function pokerFold() {
             action: 'fold'
         });
         
-        console.log('Фолд выполнен успешно:', response);
-        // Сразу запрашиваем обновление стола, чтобы увидеть изменения
+        console.log('Фолд засчитан:', response);
+        
+        // Сразу обновляем стол, чтобы увидеть изменения на экране
         if (typeof pollPokerTable === 'function') {
             await pollPokerTable(); 
         }
     } catch (error) {
-        console.error('Ошибка при фолде:', error);
+        console.error('Ошибка при выполнении фолда:', error);
         tg.showAlert('Не удалось сделать фолд: ' + error.message);
     }
 }
 
-// 2. Функция КОЛЛ (Уравнять ставку / Чек)
+// 2. Функция КОЛЛ (Уравнять ставку или Чек)
 async function pokerCall() {
-    if (!currentPokerTableId || !currentUser) return;
+    if (!currentPokerTableId || !currentUser) {
+        console.error("Нет ID стола или данных пользователя");
+        return;
+    }
     
     try {
         const response = await apiRequest('/poker/action', 'POST', {
@@ -722,55 +732,58 @@ async function pokerCall() {
             action: 'call'
         });
         
-        console.log('Колл выполнен успешно:', response);
-        // Обновляем состояние стола
+        console.log('Колл/Чек выполнен успешно:', response);
+        
+        // Сразу обновляем стол
         if (typeof pollPokerTable === 'function') {
             await pollPokerTable();
         }
     } catch (error) {
-        console.error('Ошибка при колле:', error);
+        console.error('Ошибка при выполнении колла:', error);
         tg.showAlert('Не удалось сделать колл: ' + error.message);
     }
 }
-// 3. Открыть модальное окно рейза
+
+// 3. Открытие модального окна для Повышения ставки (Рейз)
 function openRaiseModal() {
     const modal = document.getElementById('raise-modal');
     if (modal) {
-        modal.classList.add('active'); // Или modal.style.display = 'flex'; в зависимости от твоих CSS стилей
-        // Установим дефолтное значение
+        modal.style.display = 'flex'; // Показываем модалку
+        // Сбрасываем дефолтное значение ползунка/инпута на 20
         setRaiseAmount(20);
     }
 }
 
-// 4. Закрыть модальное окно рейза
+// 4. Закрытие модального окна Рейза
 function closeRaiseModal() {
     const modal = document.getElementById('raise-modal');
     if (modal) {
-        modal.classList.remove('active'); // Или modal.style.display = 'none';
+        modal.style.display = 'none'; // Скрываем модалку
     }
 }
 
-// 5. Быстрый выбор суммы кнопками (+20, +50 и т.д.)
+// 5. Быстрый выбор суммы кнопками внутри модалки (+20, +50, +100...)
 function setRaiseAmount(amount) {
     const input = document.getElementById('raise-amount');
+    const totalDisplay = document.getElementById('total-raise');
+    
     if (input) {
         input.value = amount;
-        updateTotalRaiseDisplay();
     }
-}
-
-// Ивент на ручной ввод цифр в инпут (чтобы итоговая сумма обновлялась на лету)
-document.getElementById('raise-amount')?.addEventListener('input', updateTotalRaiseDisplay);
-
-function updateTotalRaiseDisplay() {
-    const amount = parseInt(document.getElementById('raise-amount').value) || 0;
-    const totalDisplay = document.getElementById('total-raise');
     if (totalDisplay) {
         totalDisplay.innerText = amount;
     }
 }
 
-// 6. Подтверждение Повышения ставки (Отправка на бэкенд)
+// Вешаем слежение за ручным вводом суммы в инпут, чтобы итоговое число обновлялось
+document.getElementById('raise-amount')?.addEventListener('input', function(e) {
+    const totalDisplay = document.getElementById('total-raise');
+    if (totalDisplay) {
+        totalDisplay.innerText = e.target.value || 0;
+    }
+});
+
+// 6. Подтверждение Рейза (кнопка "Подтвердить" внутри модалки)
 async function confirmRaise() {
     if (!currentPokerTableId || !currentUser) return;
     
@@ -778,7 +791,7 @@ async function confirmRaise() {
     const amount = parseInt(amountInput ? amountInput.value : 0);
     
     if (isNaN(amount) || amount <= 0) {
-        tg.showAlert('Введите корректную сумму для повышения!');
+        tg.showAlert('Пожалуйста, введите корректную сумму для ставки!');
         return;
     }
 
@@ -787,21 +800,22 @@ async function confirmRaise() {
             table_id: currentPokerTableId,
             user_id: currentUser.id,
             action: 'raise',
-            amount: amount // Передаем сумму рейза бэкенду
+            amount: amount // Отправляем серверу сумму, на которую повышаем
         });
         
-        console.log('Рейз выполнен успешно:', response);
-        closeRaiseModal();
+        console.log('Рейз успешно отправлен:', response);
         
-        // Обновляем игровой стол
+        // Закрываем окно и обновляем данные стола
+        closeRaiseModal();
         if (typeof pollPokerTable === 'function') {
             await pollPokerTable();
         }
     } catch (error) {
-        console.error('Ошибка при рейзе:', error);
+        console.error('Ошибка при выполнении рейза:', error);
         tg.showAlert('Не удалось повысить ставку: ' + error.message);
     }
-    }
+}
+
     
 // === ПОКЕР: СПИСОК СТОЛОВ ===
 async function loadPokerTables() {
