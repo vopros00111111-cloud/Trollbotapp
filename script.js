@@ -121,7 +121,7 @@ function renderTop(topList) {
     }
     for (let i = 0; i < topList.length; i++) {
         const player = topList[i];
-        let medal = (i === 0) ? '🥇' : (i === 1) ? '🥈' : (i === 2) ? '🥉' : (i + 1) + '.';
+        let medal = (i === 0) ? '' : (i === 1) ? '' : (i === 2) ? '🥉' : (i + 1) + '.';
         const item = document.createElement('div');
         item.className = 'top-item';
         item.innerHTML = '<span class="top-place">' + medal + '</span><span class="top-name">@' + player.username + '</span><span class="top-score">' + player.balance.toLocaleString() + '</span>';
@@ -191,13 +191,22 @@ function switchTab(tabName) {
 function openGame(gameName) {
     document.querySelectorAll('.tab-content').forEach(function(t) { t.classList.remove('active'); });
     document.querySelectorAll('.game-section').forEach(function(t) { t.classList.remove('active'); });
-    
+
     if (gameName === 'poker') {
         document.getElementById('poker-lobby-screen').classList.add('active');
         loadPokerTables();
     } else {
-        document.getElementById('game-' + gameName).classList.add('active');    }
-    
+        const el = document.getElementById('game-' + gameName);
+        if (el) {
+            el.classList.add('active');
+        } else {
+            console.error('Секция не найдена: game-' + gameName);
+            document.getElementById('tab-games').classList.add('active');
+            document.querySelector('.bottom-nav').classList.remove('hidden');
+            return;
+        }
+    }
+
     document.querySelector('.bottom-nav').classList.add('hidden');
 }
 
