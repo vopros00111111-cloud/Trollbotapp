@@ -1,5 +1,5 @@
 let currentPokerTableId = null;
-const API_URL = 'https://trollbot-mml4.onrender.com/api';
+const API_URL = 'https://reverend-depose-aspire.ngrok-free.dev';
 const tg = window.Telegram.WebApp;
 tg.ready();
 tg.expand();
