@@ -1,5 +1,5 @@
 let currentPokerTableId = null;
-const API_URL = 'https://reverend-depose-aspire.ngrok-free.dev';
+const API_URL = 'https://reverend-depose-aspire.ngrok-free.dev/api';
 const tg = window.Telegram.WebApp;
 tg.ready();
 tg.expand();
